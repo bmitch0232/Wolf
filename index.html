@@ -1,0 +1,793 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Wolf Golf Tracker</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #f5f3ee;
+      --surface: #ffffff;
+      --surface2: #f0ede6;
+      --border: #d8d4ca;
+      --border2: #c4bfb4;
+      --text: #1a1916;
+      --text2: #6b6760;
+      --text3: #9b9890;
+      --green: #2d6a4f;
+      --green-bg: #d8f3dc;
+      --green-border: #a7d9b8;
+      --blue: #1a4f8a;
+      --blue-bg: #dbeafe;
+      --red: #991b1b;
+      --red-bg: #fee2e2;
+      --gold: #854d0e;
+      --gold-bg: #fef9c3;
+      --gold-border: #fde047;
+      --radius: 10px;
+      --radius-lg: 14px;
+    }
+
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: #151412;
+        --surface: #1e1c19;
+        --surface2: #272420;
+        --border: #3a3730;
+        --border2: #4a4740;
+        --text: #f0ede6;
+        --text2: #9b9890;
+        --text3: #6b6760;
+        --green: #6ee7b7;
+        --green-bg: #064e3b;
+        --green-border: #065f46;
+        --blue: #93c5fd;
+        --blue-bg: #1e3a5f;
+        --red: #fca5a5;
+        --red-bg: #7f1d1d;
+        --gold: #fcd34d;
+        --gold-bg: #3d2200;
+        --gold-border: #78350f;
+      }
+    }
+
+    body {
+      font-family: 'Georgia', 'Times New Roman', serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+    }
+
+    header {
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      padding: 1rem 1.25rem 0;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    .header-top { display: flex; align-items: center; gap: 10px; margin-bottom: .75rem; }
+
+    .logo {
+      width: 32px; height: 32px;
+      background: var(--text);
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+    }
+    .logo svg { width: 18px; height: 18px; fill: var(--bg); }
+
+    h1 { font-size: 18px; font-weight: 700; letter-spacing: -0.02em; }
+
+    .tab-bar { display: flex; overflow-x: auto; scrollbar-width: none; }
+    .tab-bar::-webkit-scrollbar { display: none; }
+
+    .tab {
+      padding: 10px 16px;
+      font-size: 13px;
+      font-family: 'Georgia', serif;
+      border: none; background: none; cursor: pointer;
+      border-bottom: 2.5px solid transparent;
+      color: var(--text2); white-space: nowrap;
+      transition: color .15s, border-color .15s;
+    }
+    .tab.active { color: var(--text); border-bottom-color: var(--text); font-weight: bold; }
+    .tab:hover { color: var(--text); }
+
+    .main { max-width: 680px; margin: 0 auto; padding: 1.25rem 1rem; }
+
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 1rem 1.125rem;
+      margin-bottom: 1rem;
+    }
+
+    .section-label {
+      font-size: 11px; font-weight: bold;
+      letter-spacing: .08em; text-transform: uppercase;
+      color: var(--text3); margin-bottom: .75rem;
+    }
+
+    label { font-size: 13px; color: var(--text2); display: block; margin-bottom: 4px; }
+
+    input, select {
+      width: 100%; padding: 9px 11px;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      font-size: 14px; font-family: 'Georgia', serif;
+      background: var(--surface); color: var(--text);
+      transition: border-color .15s;
+      -webkit-appearance: none;
+    }
+    input:focus, select:focus { outline: none; border-color: var(--border2); }
+
+    .form-row { margin-bottom: .875rem; }
+
+    .btn {
+      padding: 9px 16px;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      background: var(--surface); color: var(--text);
+      font-size: 13px; font-family: 'Georgia', serif;
+      cursor: pointer; transition: background .15s; white-space: nowrap;
+    }
+    .btn:hover { background: var(--surface2); }
+    .btn-primary { background: var(--text); color: var(--bg); border-color: var(--text); }
+    .btn-primary:hover { opacity: .85; }
+    .btn-danger { color: var(--red); border-color: var(--border); }
+    .btn-danger:hover { background: var(--red-bg); }
+    .btn-sm { padding: 5px 11px; font-size: 12px; }
+    .btn-block { width: 100%; text-align: center; }
+
+    .inline-row { display: flex; gap: 8px; align-items: flex-end; }
+    .inline-row > *:first-child { flex: 1; }
+
+    .player-chips { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: .75rem; min-height: 10px; }
+    .chip {
+      display: inline-flex; align-items: center; gap: 6px;
+      background: var(--surface2); border: 1px solid var(--border);
+      border-radius: 99px; padding: 5px 12px; font-size: 13px;
+    }
+    .chip button { border: none; background: none; cursor: pointer; color: var(--text2); font-size: 15px; line-height: 1; padding: 0; }
+
+    /* ── Running Totals Banner ── */
+    .totals-banner {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: .875rem 1rem;
+      margin-bottom: .875rem;
+    }
+    .totals-banner-label {
+      font-size: 11px; font-weight: bold;
+      letter-spacing: .08em; text-transform: uppercase;
+      color: var(--text3); margin-bottom: .625rem;
+    }
+    .totals-grid { display: flex; flex-wrap: wrap; gap: 8px; }
+    .total-block {
+      flex: 1 1 70px; min-width: 65px;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: .5rem .625rem;
+      text-align: center;
+      transition: background .2s, border-color .2s;
+    }
+    .total-block.leader { background: var(--green-bg); border-color: var(--green-border); }
+    .total-block-name { font-size: 11px; color: var(--text2); margin-bottom: 3px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .total-block.leader .total-block-name { color: var(--green); font-weight: bold; }
+    .total-block-pts { font-size: 24px; font-weight: bold; line-height: 1; color: var(--text); }
+    .total-block.leader .total-block-pts { color: var(--green); }
+
+    /* ── Winnings Section ── */
+    .winnings-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: .875rem 1rem;
+      margin-bottom: .875rem;
+    }
+    .winnings-grid { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: .75rem; }
+    .winnings-block {
+      flex: 1 1 70px; min-width: 65px;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: .5rem .625rem;
+      text-align: center;
+      background: var(--surface2);
+    }
+    .winnings-block.top-earner { background: var(--gold-bg); border-color: var(--gold-border); }
+    .winnings-block-name { font-size: 11px; color: var(--text2); margin-bottom: 3px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .winnings-block.top-earner .winnings-block-name { color: var(--gold); font-weight: bold; }
+    .winnings-block-amount { font-size: 20px; font-weight: bold; line-height: 1; color: var(--text); }
+    .winnings-block.top-earner .winnings-block-amount { color: var(--gold); }
+
+    .rate-row {
+      display: flex; align-items: center; justify-content: flex-end;
+      gap: 6px; font-size: 12px; color: var(--text3);
+    }
+    .rate-row input {
+      width: 72px; padding: 5px 8px;
+      font-size: 13px; text-align: right;
+    }
+
+    /* ── Scorecard ── */
+    .scorecard-wrap { overflow-x: hidden; }
+    .scorecard { width: 100%; border-collapse: collapse; font-size: 13px; }
+    .scorecard th {
+      padding: 7px 4px;
+      border-bottom: 1px solid var(--border);
+      font-weight: bold; font-size: 11px;
+      letter-spacing: .03em; color: var(--text2);
+      text-align: center;
+    }
+    .scorecard th.hole-head { text-align: left; color: var(--text3); }
+    .scorecard td {
+      padding: 3px 2px;
+      border-bottom: 1px solid var(--border);
+      text-align: center; vertical-align: middle;
+    }
+    .scorecard td.hole-num {
+      font-size: 12px; color: var(--text2); font-weight: bold;
+      text-align: left; padding-left: 4px; width: 38px;
+    }
+
+    .pts-input {
+      width: 48px; padding: 5px 2px; text-align: center;
+      border: 1px solid var(--border); border-radius: 6px;
+      font-size: 14px; font-family: 'Georgia', serif;
+      background: var(--surface); color: var(--text);
+      -webkit-appearance: none; -moz-appearance: textfield;
+    }
+    .pts-input::-webkit-inner-spin-button,
+    .pts-input::-webkit-outer-spin-button { -webkit-appearance: none; }
+    .pts-input:focus { outline: none; border-color: var(--border2); background: var(--surface2); }
+
+    /* ── Round cards ── */
+    .round-card {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: var(--radius-lg); padding: 1rem 1.125rem; margin-bottom: .875rem;
+    }
+    .round-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: .5rem; }
+    .round-title { font-size: 15px; font-weight: bold; }
+    .round-players { font-size: 12px; color: var(--text2); margin-bottom: .625rem; }
+    .round-actions { display: flex; gap: 6px; flex-shrink: 0; }
+    .score-badges { display: flex; flex-wrap: wrap; gap: 5px; }
+    .score-badge {
+      font-size: 12px; font-weight: bold;
+      padding: 3px 9px; border-radius: 99px;
+      background: var(--surface2); color: var(--text);
+    }
+    .score-badge.leader { background: var(--green-bg); color: var(--green); }
+
+    .empty-state { text-align: center; padding: 3rem 1rem; color: var(--text2); font-size: 14px; }
+    .empty-icon { font-size: 2.5rem; margin-bottom: .75rem; }
+    .hint { font-size: 12px; color: var(--text3); margin-top: .5rem; }
+
+    .player-row {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: .625rem 0; border-bottom: 1px solid var(--border);
+    }
+    .player-row:last-child { border-bottom: none; }
+
+    .round-select-row {
+      display: flex; align-items: center;
+      margin-bottom: .875rem; gap: 10px;
+    }
+    .round-select-row select { flex: 1; }
+
+    /* ── Winnings Tab ── */
+    .winnings-summary-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 1rem 1.125rem;
+      margin-bottom: 1rem;
+    }
+    .winnings-table { width: 100%; border-collapse: collapse; font-size: 14px; }
+    .winnings-table th {
+      text-align: left; padding: 7px 8px;
+      border-bottom: 1px solid var(--border);
+      font-size: 11px; font-weight: bold;
+      letter-spacing: .05em; text-transform: uppercase;
+      color: var(--text3);
+    }
+    .winnings-table th:last-child { text-align: right; }
+    .winnings-table td { padding: 9px 8px; border-bottom: 1px solid var(--border); }
+    .winnings-table td:last-child { text-align: right; font-weight: bold; }
+    .winnings-table tr:last-child td { border-bottom: none; }
+    .winnings-table tr.top-row td { color: var(--gold); }
+    .winner-label {
+      font-size: 11px; font-weight: bold;
+      background: var(--gold-bg); color: var(--gold);
+      border: 1px solid var(--gold-border);
+      border-radius: 99px; padding: 1px 7px;
+      margin-left: 6px; vertical-align: middle;
+    }
+    .winnings-total-row {
+      display: flex; justify-content: space-between;
+      padding: .5rem .125rem; font-size: 13px; color: var(--text2);
+      border-top: 1px solid var(--border); margin-top: .25rem;
+    }
+
+    @media (max-width: 480px) {
+      .pts-input { width: 42px; font-size: 13px; }
+      .scorecard th, .scorecard td { padding-left: 1px; padding-right: 1px; }
+      .total-block-pts { font-size: 20px; }
+      .winnings-block-amount { font-size: 17px; }
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="header-top">
+    <div class="logo">
+      <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+        <circle cx="12" cy="5" r="3"/>
+        <path d="M12 8 Q7 12 8 18 H16 Q17 12 12 8Z"/>
+        <rect x="11" y="18" width="2" height="4" rx="1"/>
+      </svg>
+    </div>
+    <h1>Wolf Golf Tracker</h1>
+  </div>
+  <nav class="tab-bar">
+    <button class="tab active" onclick="showTab('rounds')" id="tab-rounds">Rounds</button>
+    <button class="tab" onclick="showTab('new-round')" id="tab-new-round">New Round</button>
+    <button class="tab" onclick="showTab('scorecard')" id="tab-scorecard">Scorecard</button>
+    <button class="tab" onclick="showTab('winnings')" id="tab-winnings">Winnings</button>
+    <button class="tab" onclick="showTab('players')" id="tab-players">Players</button>
+  </nav>
+</header>
+
+<main class="main">
+  <div id="view-rounds"></div>
+  <div id="view-new-round" style="display:none"></div>
+  <div id="view-scorecard" style="display:none"></div>
+  <div id="view-winnings" style="display:none"></div>
+  <div id="view-players" style="display:none"></div>
+</main>
+
+<script>
+  const RATE = 0.25; // dollars per point
+
+  let state = { players: [], rounds: [], currentRound: null, activeTab: 'rounds', pointRate: RATE };
+  let newRoundPlayers = [];
+
+  function save() {
+    try { localStorage.setItem('wolf_golf_tracker', JSON.stringify(state)); } catch(e) {}
+  }
+
+  function load() {
+    try {
+      const raw = localStorage.getItem('wolf_golf_tracker');
+      if (raw) {
+        const s = JSON.parse(raw);
+        state.players   = s.players   || [];
+        state.rounds    = s.rounds    || [];
+        state.pointRate = s.pointRate != null ? s.pointRate : RATE;
+      }
+    } catch(e) {}
+    render();
+  }
+
+  function showTab(tab) {
+    ['rounds','new-round','scorecard','winnings','players'].forEach(t => {
+      document.getElementById('view-' + t).style.display = 'none';
+      document.getElementById('tab-' + t).classList.remove('active');
+    });
+    document.getElementById('view-' + tab).style.display = 'block';
+    document.getElementById('tab-' + tab).classList.add('active');
+    state.activeTab = tab;
+    renderTab(tab);
+  }
+
+  function render() { renderTab(state.activeTab); }
+  function renderTab(tab) {
+    if (tab === 'rounds')    renderRounds();
+    if (tab === 'new-round') renderNewRound();
+    if (tab === 'scorecard') renderScorecard();
+    if (tab === 'winnings')  renderWinnings();
+    if (tab === 'players')   renderPlayers();
+  }
+
+  // ── Helpers ──────────────────────────────────────────────────────────────
+  function today() { return new Date().toISOString().slice(0, 10); }
+
+  function formatDate(d) {
+    if (!d) return '';
+    const [y, m, day] = d.split('-');
+    const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+    return `${months[parseInt(m)-1]} ${parseInt(day)}, ${y}`;
+  }
+
+  function esc(str) {
+    return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  }
+
+  function safeKey(roundId, name) {
+    return `tot-${roundId}-${String(name).replace(/[^a-z0-9]/gi,'_')}`;
+  }
+
+  function calcTotals(round) {
+    const totals = {};
+    round.players.forEach(p => {
+      totals[p] = 0;
+      for (let h = 1; h <= 18; h++) totals[p] += Number(round.scores?.[p]?.[h] || 0);
+    });
+    return totals;
+  }
+
+  function fmt$(n) {
+    return '$' + Math.abs(n).toFixed(2);
+  }
+
+  // ── Rounds list ──────────────────────────────────────────────────────────
+  function renderRounds() {
+    const el = document.getElementById('view-rounds');
+    if (!state.rounds.length) {
+      el.innerHTML = `<div class="empty-state"><div class="empty-icon">⛳</div><div>No rounds yet.</div><div style="margin-top:.5rem">Hit <strong>New Round</strong> to get started.</div></div>`;
+      return;
+    }
+    const sorted = [...state.rounds].sort((a, b) => new Date(b.date) - new Date(a.date));
+    el.innerHTML = sorted.map(r => {
+      const totals = calcTotals(r);
+      const maxPts = Math.max(...Object.values(totals));
+      return `<div class="round-card">
+        <div class="round-header">
+          <div class="round-title">${formatDate(r.date)}</div>
+          <div class="round-actions">
+            <button class="btn btn-sm" onclick="openRound('${r.id}')">Edit</button>
+            <button class="btn btn-sm btn-danger" onclick="deleteRound('${r.id}')">Delete</button>
+          </div>
+        </div>
+        <div class="round-players">Players: ${r.players.map(esc).join(' · ')}</div>
+        <div class="score-badges">
+          ${r.players.map(p => {
+            const isLeader = totals[p] === maxPts && maxPts > 0;
+            return `<span class="score-badge${isLeader ? ' leader' : ''}">${esc(p)}: ${totals[p]} pts</span>`;
+          }).join('')}
+        </div>
+      </div>`;
+    }).join('');
+  }
+
+  function deleteRound(id) {
+    if (!confirm('Delete this round? This cannot be undone.')) return;
+    state.rounds = state.rounds.filter(r => r.id !== id);
+    if (state.currentRound === id) state.currentRound = null;
+    save(); render();
+  }
+
+  function openRound(id) {
+    state.currentRound = id;
+    showTab('scorecard');
+  }
+
+  // ── New Round ────────────────────────────────────────────────────────────
+  function renderNewRound() {
+    const el = document.getElementById('view-new-round');
+    el.innerHTML = `
+      <div class="card">
+        <div class="section-label">Round details</div>
+        <div class="form-row">
+          <label>Date</label>
+          <input id="nr-date" type="date" value="${today()}" />
+        </div>
+      </div>
+      <div class="card">
+        <div class="section-label">Players</div>
+        <div class="player-chips" id="nr-chips">
+          ${newRoundPlayers.map(p => `<span class="chip">${esc(p)}<button onclick="removeNRPlayer('${esc(p)}')">×</button></span>`).join('')}
+        </div>
+        <div class="inline-row">
+          <div>
+            <input id="nr-player-input" placeholder="Player name" list="player-datalist" autocomplete="off"
+              onkeydown="if(event.key==='Enter'){event.preventDefault();addNRPlayer()}" />
+            <datalist id="player-datalist">
+              ${state.players.map(p => `<option value="${esc(p)}">`).join('')}
+            </datalist>
+          </div>
+          <button class="btn" onclick="addNRPlayer()">Add</button>
+        </div>
+        <p class="hint">Saved players appear as suggestions when you start typing.</p>
+      </div>
+      <button class="btn btn-primary btn-block" onclick="createRound()">Start Round ›</button>`;
+  }
+
+  function removeNRPlayer(name) {
+    newRoundPlayers = newRoundPlayers.filter(p => p !== name);
+    renderNewRound();
+  }
+
+  function addNRPlayer() {
+    const input = document.getElementById('nr-player-input');
+    const name = input.value.trim();
+    if (!name || newRoundPlayers.includes(name)) { input.value = ''; return; }
+    newRoundPlayers.push(name);
+    if (!state.players.includes(name)) { state.players.push(name); save(); }
+    input.value = '';
+    renderNewRound();
+    setTimeout(() => document.getElementById('nr-player-input')?.focus(), 50);
+  }
+
+  function createRound() {
+    const date = document.getElementById('nr-date').value || today();
+    if (!newRoundPlayers.length) { alert('Add at least one player.'); return; }
+    const id = 'r' + Date.now();
+    const scores = {};
+    newRoundPlayers.forEach(p => scores[p] = {});
+    state.rounds.push({ id, date, players: [...newRoundPlayers], scores });
+    state.currentRound = id;
+    newRoundPlayers = [];
+    save();
+    showTab('scorecard');
+  }
+
+  // ── Scorecard ────────────────────────────────────────────────────────────
+  function renderScorecard() {
+    const el = document.getElementById('view-scorecard');
+
+    if (!state.rounds.length) {
+      el.innerHTML = `<div class="empty-state"><div class="empty-icon">📋</div><div>No rounds yet. Create one first.</div></div>`;
+      return;
+    }
+    if (!state.currentRound || !state.rounds.find(r => r.id === state.currentRound)) {
+      state.currentRound = state.rounds[state.rounds.length - 1].id;
+    }
+
+    const round = state.rounds.find(r => r.id === state.currentRound);
+    const players = round.players;
+    const totals = calcTotals(round);
+    const maxPts = Math.max(...Object.values(totals));
+    const rate = state.pointRate;
+
+    // Running totals banner
+    const bannerHTML = players.map(p => {
+      const isLeader = totals[p] === maxPts && maxPts > 0;
+      return `<div class="total-block${isLeader ? ' leader' : ''}" id="${safeKey(round.id, p)}">
+        <div class="total-block-name">${esc(p)}</div>
+        <div class="total-block-pts">${totals[p]}</div>
+      </div>`;
+    }).join('');
+
+    // Winnings blocks
+    const maxWin = Math.max(...players.map(p => totals[p] * rate));
+    const winningsHTML = players.map(p => {
+      const amount = totals[p] * rate;
+      const isTop = amount === maxWin && maxWin > 0;
+      return `<div class="winnings-block${isTop ? ' top-earner' : ''}" id="win-${safeKey(round.id, p)}">
+        <div class="winnings-block-name">${esc(p)}</div>
+        <div class="winnings-block-amount">${fmt$(amount)}</div>
+      </div>`;
+    }).join('');
+
+    // Hole rows
+    let rows = '';
+    for (let h = 1; h <= 18; h++) {
+      const cells = players.map(p => {
+        const val = round.scores[p]?.[h] ?? '';
+        return `<td><input class="pts-input" type="number" inputmode="numeric" min="0" max="99"
+          value="${val}" placeholder="—"
+          oninput="liveScore('${round.id}','${p}',${h},this.value)" /></td>`;
+      }).join('');
+      rows += `<tr><td class="hole-num">${h}</td>${cells}</tr>`;
+    }
+
+    const holeW = 38;
+    const colW = Math.max(50, Math.floor((Math.min(window.innerWidth, 680) - holeW - 32) / players.length));
+
+    el.innerHTML = `
+      <div class="round-select-row">
+        <select onchange="switchRound(this.value)">
+          ${state.rounds
+            .slice().sort((a,b) => new Date(b.date)-new Date(a.date))
+            .map(r => `<option value="${r.id}" ${r.id === state.currentRound ? 'selected' : ''}>${formatDate(r.date)}</option>`)
+            .join('')}
+        </select>
+      </div>
+
+      <div class="totals-banner">
+        <div class="totals-banner-label">Running Totals</div>
+        <div class="totals-grid" id="totals-grid-${round.id}">${bannerHTML}</div>
+      </div>
+
+      <div class="winnings-card">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:.625rem">
+          <div class="totals-banner-label" style="margin-bottom:0">Winnings</div>
+          <div class="rate-row">
+            <span>$ per point:</span>
+            <input type="number" min="0.01" step="0.01" value="${rate.toFixed(2)}"
+              style="width:72px"
+              onchange="updateRate(this.value)" />
+          </div>
+        </div>
+        <div class="winnings-grid" id="winnings-grid-${round.id}">${winningsHTML}</div>
+      </div>
+
+      <div class="scorecard-wrap">
+        <table class="scorecard">
+          <thead><tr>
+            <th class="hole-head" style="width:${holeW}px">Hole</th>
+            ${players.map(p => `<th style="width:${colW}px">${esc(p)}</th>`).join('')}
+          </tr></thead>
+          <tbody>${rows}</tbody>
+        </table>
+      </div>
+      <p class="hint" style="margin-top:.625rem">Enter points per hole — totals and winnings update instantly.</p>`;
+  }
+
+  function updateRate(val) {
+    const n = parseFloat(val);
+    if (isNaN(n) || n <= 0) return;
+    state.pointRate = n;
+    save();
+    // Refresh winnings display without full re-render
+    const round = state.rounds.find(r => r.id === state.currentRound);
+    if (round) refreshWinnings(round);
+  }
+
+  function liveScore(roundId, player, hole, val) {
+    const round = state.rounds.find(r => r.id === roundId);
+    if (!round) return;
+    if (!round.scores[player]) round.scores[player] = {};
+    round.scores[player][hole] = val === '' ? '' : Number(val);
+    save();
+    const totals = calcTotals(round);
+    const maxPts = Math.max(...Object.values(totals));
+    // Update totals banner
+    round.players.forEach(p => {
+      const el = document.getElementById(safeKey(roundId, p));
+      if (!el) return;
+      const isLeader = totals[p] === maxPts && maxPts > 0;
+      el.className = 'total-block' + (isLeader ? ' leader' : '');
+      el.querySelector('.total-block-pts').textContent = totals[p];
+    });
+    // Update winnings
+    refreshWinnings(round);
+  }
+
+  function refreshWinnings(round) {
+    const totals = calcTotals(round);
+    const rate = state.pointRate;
+    const maxWin = Math.max(...round.players.map(p => totals[p] * rate));
+    round.players.forEach(p => {
+      const el = document.getElementById('win-' + safeKey(round.id, p));
+      if (!el) return;
+      const amount = totals[p] * rate;
+      const isTop = amount === maxWin && maxWin > 0;
+      el.className = 'winnings-block' + (isTop ? ' top-earner' : '');
+      el.querySelector('.winnings-block-amount').textContent = fmt$(amount);
+    });
+  }
+
+  function switchRound(id) {
+    state.currentRound = id;
+    renderScorecard();
+  }
+
+  // ── Winnings Tab ─────────────────────────────────────────────────────────
+  function renderWinnings() {
+    const el = document.getElementById('view-winnings');
+    if (!state.rounds.length) {
+      el.innerHTML = `<div class="empty-state"><div class="empty-icon">💰</div><div>No rounds yet.</div></div>`;
+      return;
+    }
+
+    const rate = state.pointRate;
+
+    // Aggregate totals across all rounds per player
+    const allPlayers = [...new Set(state.rounds.flatMap(r => r.players))];
+    const lifetimePts = {};
+    allPlayers.forEach(p => lifetimePts[p] = 0);
+    state.rounds.forEach(r => {
+      const t = calcTotals(r);
+      r.players.forEach(p => { lifetimePts[p] = (lifetimePts[p] || 0) + t[p]; });
+    });
+    const sorted = allPlayers.slice().sort((a,b) => lifetimePts[b] - lifetimePts[a]);
+    const topPts = lifetimePts[sorted[0]] || 0;
+
+    // Per-round breakdowns
+    const roundsSorted = [...state.rounds].sort((a,b) => new Date(b.date)-new Date(a.date));
+
+    let roundSections = roundsSorted.map(r => {
+      const totals = calcTotals(r);
+      const maxPts = Math.max(...Object.values(totals));
+      const roundPlayers = r.players.slice().sort((a,b) => totals[b]-totals[a]);
+      return `<div class="winnings-summary-card">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:.625rem">
+          <div style="font-weight:bold;font-size:14px">${formatDate(r.date)}</div>
+          <div style="font-size:12px;color:var(--text3)">$${rate.toFixed(2)}/pt</div>
+        </div>
+        <table class="winnings-table">
+          <thead><tr><th>Player</th><th>Points</th><th>Winnings</th></tr></thead>
+          <tbody>
+            ${roundPlayers.map(p => {
+              const isTop = totals[p] === maxPts && maxPts > 0;
+              return `<tr class="${isTop ? 'top-row' : ''}">
+                <td>${esc(p)}${isTop ? '<span class="winner-label">Winner</span>' : ''}</td>
+                <td>${totals[p]}</td>
+                <td>${fmt$(totals[p] * rate)}</td>
+              </tr>`;
+            }).join('')}
+          </tbody>
+        </table>
+      </div>`;
+    }).join('');
+
+    el.innerHTML = `
+      <div class="card">
+        <div class="section-label">All-Time Earnings</div>
+        <table class="winnings-table">
+          <thead><tr><th>Player</th><th>Total Points</th><th>Total Winnings</th></tr></thead>
+          <tbody>
+            ${sorted.map(p => {
+              const isTop = lifetimePts[p] === topPts && topPts > 0;
+              return `<tr class="${isTop ? 'top-row' : ''}">
+                <td>${esc(p)}${isTop ? '<span class="winner-label">Leader</span>' : ''}</td>
+                <td>${lifetimePts[p]}</td>
+                <td>${fmt$(lifetimePts[p] * rate)}</td>
+              </tr>`;
+            }).join('')}
+          </tbody>
+        </table>
+        <div class="winnings-total-row">
+          <span>Rate: $${rate.toFixed(2)} per point</span>
+          <span>Total pot: ${fmt$(Object.values(lifetimePts).reduce((a,b)=>a+b,0) * rate)}</span>
+        </div>
+      </div>
+
+      <div class="section-label" style="margin-bottom:.625rem">By Round</div>
+      ${roundSections}`;
+  }
+
+  // ── Players ──────────────────────────────────────────────────────────────
+  function renderPlayers() {
+    const el = document.getElementById('view-players');
+    el.innerHTML = `
+      <div class="card">
+        <div class="section-label">Saved players (${state.players.length})</div>
+        ${state.players.length
+          ? state.players.map(p => `
+              <div class="player-row">
+                <span>${esc(p)}</span>
+                <button class="btn btn-sm btn-danger" onclick="deletePlayer('${esc(p)}')">Remove</button>
+              </div>`).join('')
+          : `<div style="font-size:14px;color:var(--text2);padding:.25rem 0">No saved players yet.</div>`
+        }
+      </div>
+      <div class="card">
+        <div class="section-label">Add player</div>
+        <div class="inline-row">
+          <div>
+            <input id="new-player-input" placeholder="Player name"
+              onkeydown="if(event.key==='Enter'){event.preventDefault();addPlayer()}" />
+          </div>
+          <button class="btn" onclick="addPlayer()">Add</button>
+        </div>
+      </div>`;
+  }
+
+  function addPlayer() {
+    const input = document.getElementById('new-player-input');
+    const name = input.value.trim();
+    if (!name || state.players.includes(name)) { input.value = ''; return; }
+    state.players.push(name);
+    input.value = '';
+    save(); renderPlayers();
+  }
+
+  function deletePlayer(name) {
+    state.players = state.players.filter(p => p !== name);
+    save(); renderPlayers();
+  }
+
+  load();
+</script>
+</body>
+</html>
