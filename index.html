@@ -104,7 +104,7 @@
     .chip { display: inline-flex; align-items: center; gap: 6px; background: var(--surface2); border: 1px solid var(--border); border-radius: 99px; padding: 5px 12px; font-size: 13px; }
     .chip button { border: none; background: none; cursor: pointer; color: var(--text2); font-size: 15px; line-height: 1; padding: 0; }
 
-    /* ── Banners ── */
+    /* â”€â”€ Banners â”€â”€ */
     .summary-banner { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: .875rem 1rem; margin-bottom: .875rem; }
     .banner-label { font-size: 11px; font-weight: bold; letter-spacing: .08em; text-transform: uppercase; color: var(--text3); margin-bottom: .625rem; }
     .blocks-grid { display: flex; flex-wrap: wrap; gap: 8px; }
@@ -126,7 +126,7 @@
     .rate-row { display: flex; align-items: center; justify-content: flex-end; gap: 6px; font-size: 12px; color: var(--text3); }
     .rate-row input { width: 72px; padding: 5px 8px; font-size: 13px; text-align: right; }
 
-    /* ── Sticky name bar ── */
+    /* â”€â”€ Sticky name bar â”€â”€ */
     #sticky-names {
       position: sticky;
       top: 0; /* will be set by JS */
@@ -139,7 +139,7 @@
     .sticky-hole-col { flex: 0 0 38px; min-width: 38px; padding: 7px 4px 7px 4px; font-size: 11px; font-weight: bold; color: var(--text3); letter-spacing: .03em; }
     .sticky-name-col { flex: 1; padding: 7px 4px; font-size: 11px; font-weight: bold; color: var(--text2); text-align: center; letter-spacing: .03em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
-    /* ── Scorecard ── */
+    /* â”€â”€ Scorecard â”€â”€ */
     .scorecard-wrap { overflow-x: hidden; }
     .scorecard { width: 100%; border-collapse: collapse; font-size: 13px; }
     /* sticky name bar handled by #sticky-names div */
@@ -151,7 +151,7 @@
     .pts-input::-webkit-inner-spin-button, .pts-input::-webkit-outer-spin-button { -webkit-appearance: none; }
     .pts-input:focus { outline: none; border-color: var(--border2); background: var(--surface2); }
 
-    /* ── Round cards ── */
+    /* â”€â”€ Round cards â”€â”€ */
     .round-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 1rem 1.125rem; margin-bottom: .875rem; }
     .round-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: .5rem; }
     .round-title { font-size: 15px; font-weight: bold; }
@@ -161,7 +161,7 @@
     .score-badge { font-size: 12px; font-weight: bold; padding: 3px 9px; border-radius: 99px; background: var(--surface2); color: var(--text); }
     .score-badge.leader { background: var(--green-bg); color: var(--green); }
 
-    /* ── History ── */
+    /* â”€â”€ History â”€â”€ */
     .all-time-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 1rem 1.125rem; margin-bottom: 1.25rem; }
     .hist-table { width: 100%; border-collapse: collapse; font-size: 13px; }
     .hist-table th { text-align: left; padding: 6px 8px; border-bottom: 1px solid var(--border); font-size: 11px; font-weight: bold; letter-spacing: .05em; text-transform: uppercase; color: var(--text3); }
@@ -186,7 +186,7 @@
     .hole-cell { background: var(--surface2); border: 1px solid var(--border); border-radius: 4px; padding: 3px 2px; text-align: center; font-size: 11px; }
     .hole-cell .h-num { color: var(--text3); font-size: 10px; }
 
-    /* ── Setup banner ── */
+    /* â”€â”€ Setup banner â”€â”€ */
     .setup-banner { background: var(--gold-bg); border: 1px solid var(--gold-border); border-radius: var(--radius-lg); padding: 1rem 1.125rem; margin-bottom: 1rem; }
     .setup-banner h3 { font-size: 14px; font-weight: bold; color: var(--gold); margin-bottom: .5rem; }
     .setup-banner p { font-size: 13px; color: var(--text2); margin-bottom: .375rem; line-height: 1.6; }
@@ -222,7 +222,7 @@
       </svg>
     </div>
     <h1>Central Valley Golf Tracker</h1>
-    <span class="sync-badge setup" id="sync-badge">⚙ Setup</span>
+    <span class="sync-badge setup" id="sync-badge">âš™ Setup</span>
   </div>
   <nav class="tab-bar">
     <button class="tab active" onclick="showTab('rounds')"    id="tab-rounds">Rounds</button>
@@ -242,12 +242,12 @@
 </main>
 
 <script>
-// ═══════════════════════════════════════════════════════════════
-// 🔧  PASTE YOUR GOOGLE APPS SCRIPT WEB APP URL HERE
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+// ðŸ”§  PASTE YOUR GOOGLE APPS SCRIPT WEB APP URL HERE
 //     Leave blank to run in local-only mode.
-// ═══════════════════════════════════════════════════════════════
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwAPqiWYDwbiCE5tgIkFqwcE0vVQSR13hNbGvqDe41oY5LtdiRaEjeDlHoKwqHe9Avj/exec";
-// ═══════════════════════════════════════════════════════════════
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 const DEFAULT_RATE = 0.25;
 
@@ -262,7 +262,7 @@ let state = {
 let newRoundPlayers = [];
 let debounceTimers  = {};
 
-// ── Local storage ────────────────────────────────────────────
+// â”€â”€ Local storage â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function localSave() {
   try { localStorage.setItem('central_valley_golf', JSON.stringify(state)); } catch(e) {}
 }
@@ -275,10 +275,10 @@ function localLoad() {
   } catch(e) {}
 }
 
-// ── Google Sheets helpers ─────────────────────────────────────
+// â”€â”€ Google Sheets helpers â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function gsConfigured() { return APPS_SCRIPT_URL && APPS_SCRIPT_URL.startsWith('https://'); }
 
-// JSONP GET — bypasses CORS by injecting a <script> tag
+// JSONP GET â€” bypasses CORS by injecting a <script> tag
 function gsGet(action) {
   return new Promise((resolve) => {
     const cbName = 'gs_cb_' + Date.now();
@@ -296,7 +296,7 @@ function gsGet(action) {
   });
 }
 
-// POST via no-cors (writes only — response not readable but data saves fine)
+// POST via no-cors (writes only â€” response not readable but data saves fine)
 async function gsPost(payload) {
   if (!gsConfigured()) return null;
   try {
@@ -329,24 +329,24 @@ async function gsSaveMeta(players, pointRate) {
 });
 }
 
-// ── Badge helper ─────────────────────────────────────────────
+// â”€â”€ Badge helper â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function setBadge(text, cls) {
   const b = document.getElementById('sync-badge');
   b.textContent = text;
   b.className = 'sync-badge ' + cls;
 }
 
-// ── Init ─────────────────────────────────────────────────────
+// â”€â”€ Init â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 async function init() {
   localLoad();
 
   if (!gsConfigured()) {
-    setBadge('⚙ Setup needed', 'setup');
+    setBadge('âš™ Setup needed', 'setup');
     render();
     return;
   }
 
-  setBadge('↻ Loading…', 'offline');
+  setBadge('â†» Loadingâ€¦', 'offline');
   const data = await gsLoadAll();
   if (data) {
     state.rounds    = data.rounds    || [];
@@ -354,20 +354,20 @@ async function init() {
     state.pointRate = data.pointRate ?? DEFAULT_RATE;
     localSave();
     state.gsConnected = true;
-    setBadge('📊 Sheets', 'connected');
+    setBadge('ðŸ“Š Sheets', 'connected');
   } else {
-    setBadge('📱 Local only', 'offline');
+    setBadge('ðŸ“± Local only', 'offline');
   }
   render();
 }
 
-// ── Save helpers ─────────────────────────────────────────────
+// â”€â”€ Save helpers â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 async function saveRound(round) {
   localSave();
   if (state.gsConnected) {
-    setBadge('↑ Saving…', 'saving');
+    setBadge('â†‘ Savingâ€¦', 'saving');
     await gsSaveRound(round);
-    setBadge('📊 Sheets', 'connected');
+    setBadge('ðŸ“Š Sheets', 'connected');
   }
 }
 
@@ -376,7 +376,7 @@ async function saveMeta() {
   if (state.gsConnected) await gsSaveMeta(state.players, state.pointRate);
 }
 
-// ── Tab routing ──────────────────────────────────────────────
+// â”€â”€ Tab routing â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function showTab(tab) {
   ['rounds','new-round','scorecard','history','players'].forEach(t => {
     document.getElementById('view-'+t).style.display = 'none';
@@ -396,7 +396,7 @@ function renderTab(tab) {
   if (tab==='players')   renderPlayers();
 }
 
-// ── Helpers ──────────────────────────────────────────────────
+// â”€â”€ Helpers â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function today() { return new Date().toISOString().slice(0,10); }
 function formatDate(d) {
   if (!d) return '';
@@ -417,21 +417,21 @@ function calcTotals(round) {
 }
 function fmtMoney(n) { return '$'+n.toFixed(2); }
 
-// ── Setup banner ─────────────────────────────────────────────
+// â”€â”€ Setup banner â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function setupBanner() {
   if (gsConfigured()) return '';
   return `<div class="setup-banner">
-    <h3>📊 Connect Google Sheets to save your data</h3>
+    <h3>ðŸ“Š Connect Google Sheets to save your data</h3>
     <p>Data currently saves to this browser only. Follow the setup guide (<code>SHEETS_SETUP.md</code>) to enable cloud sync, then paste your Web App URL into <code>index.html</code>.</p>
   </div>`;
 }
 
-// ── Rounds ───────────────────────────────────────────────────
+// â”€â”€ Rounds â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function renderRounds() {
   const el = document.getElementById('view-rounds');
   const sorted = [...state.rounds].sort((a,b)=>new Date(b.date)-new Date(a.date));
   if (!sorted.length) {
-    el.innerHTML = setupBanner()+`<div class="empty-state"><div class="empty-icon">⛳</div><div>No rounds yet.</div><div style="margin-top:.5rem">Hit <strong>New Round</strong> to get started.</div></div>`;
+    el.innerHTML = setupBanner()+`<div class="empty-state"><div class="empty-icon">â›³</div><div>No rounds yet.</div><div style="margin-top:.5rem">Hit <strong>New Round</strong> to get started.</div></div>`;
     return;
   }
   el.innerHTML = setupBanner()+sorted.map(r=>{
@@ -444,9 +444,9 @@ function renderRounds() {
           <button class="btn btn-sm btn-danger" onclick="deleteRound('${r.id}')">Delete</button>
         </div>
       </div>
-      <div class="round-players">Players: ${(r.players||[]).map(esc).join(' · ')}</div>
+      <div class="round-players">Players: ${(r.players||[]).map(esc).join(' Â· ')}</div>
       <div class="score-badges">
-        ${(r.players||[]).map(p=>`<span class="score-badge${t[p]===maxP&&maxP>0?' leader':''}">${esc(p)}: ${t[p]} pts · ${fmtMoney(t[p]*state.pointRate)}</span>`).join('')}
+        ${(r.players||[]).map(p=>`<span class="score-badge${t[p]===maxP&&maxP>0?' leader':''}">${esc(p)}: ${t[p]} pts Â· ${fmtMoney(t[p]*state.pointRate)}</span>`).join('')}
       </div>
     </div>`;
   }).join('');
@@ -462,7 +462,7 @@ async function deleteRound(id) {
 }
 function openRound(id) { state.currentRound=id; showTab('scorecard'); }
 
-// ── New Round ────────────────────────────────────────────────
+// â”€â”€ New Round â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function renderNewRound() {
   document.getElementById('view-new-round').innerHTML=`
     <div class="card">
@@ -471,7 +471,7 @@ function renderNewRound() {
     </div>
     <div class="card">
       <div class="section-label">Players</div>
-      <div class="player-chips">${newRoundPlayers.map(p=>`<span class="chip">${esc(p)}<button onclick="removeNRP('${esc(p)}')">×</button></span>`).join('')}</div>
+      <div class="player-chips">${newRoundPlayers.map(p=>`<span class="chip">${esc(p)}<button onclick="removeNRP('${esc(p)}')">Ã—</button></span>`).join('')}</div>
       <div class="inline-row">
         <div>
           <input id="nr-pi" placeholder="Player name" list="nrpl" autocomplete="off"
@@ -482,7 +482,7 @@ function renderNewRound() {
       </div>
       <p class="hint">Saved players appear as suggestions.</p>
     </div>
-    <button class="btn btn-primary btn-block" onclick="createRound()">Start Round ›</button>`;
+    <button class="btn btn-primary btn-block" onclick="createRound()">Start Round â€º</button>`;
 }
 function removeNRP(name) { newRoundPlayers=newRoundPlayers.filter(p=>p!==name); renderNewRound(); }
 function addNRP() {
@@ -506,10 +506,10 @@ async function createRound() {
   showTab('scorecard');
 }
 
-// ── Scorecard ────────────────────────────────────────────────
+// â”€â”€ Scorecard â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function renderScorecard() {
   const el=document.getElementById('view-scorecard');
-  if (!state.rounds.length){el.innerHTML=`<div class="empty-state"><div class="empty-icon">📋</div><div>No rounds yet.</div></div>`;return;}
+  if (!state.rounds.length){el.innerHTML=`<div class="empty-state"><div class="empty-icon">ðŸ“‹</div><div>No rounds yet.</div></div>`;return;}
   if (!state.currentRound||!state.rounds.find(r=>r.id===state.currentRound))
     state.currentRound=state.rounds.slice().sort((a,b)=>new Date(b.date)-new Date(a.date))[0].id;
 
@@ -541,7 +541,7 @@ function renderScorecard() {
     rows+=`<tr><td class="hole-num">${h}</td>${players.map(p=>{
       const v=round.scores?.[p]?.[h]??'';
       return `<td><input class="pts-input" type="number" inputmode="numeric" min="0" max="99"
-        value="${v}" placeholder="—"
+        value="${v}" placeholder="â€”"
         oninput="liveScore('${round.id}','${p}',${h},this.value)"/></td>`;
     }).join('')}</tr>`;
   }
@@ -578,7 +578,7 @@ function renderScorecard() {
         <tbody>${rows}</tbody>
       </table>
     </div>
-    <p class="hint" style="margin-top:.625rem">Enter points per hole — totals and winnings update instantly.</p>`;
+    <p class="hint" style="margin-top:.625rem">Enter points per hole â€” totals and winnings update instantly.</p>`;
 
   // Anchor the sticky name bar just below the app header
   function applyNameBarOffset() {
@@ -626,11 +626,11 @@ async function updateRate(val) {
 }
 function switchRound(id){state.currentRound=id;renderScorecard();}
 
-// ── History ──────────────────────────────────────────────────
+// â”€â”€ History â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function renderHistory() {
   const el=document.getElementById('view-history');
   if (!state.rounds.length){
-    el.innerHTML=`<div class="empty-state"><div class="empty-icon">📖</div><div>No rounds in history yet.</div></div>`;
+    el.innerHTML=`<div class="empty-state"><div class="empty-icon">ðŸ“–</div><div>No rounds in history yet.</div></div>`;
     return;
   }
   const rate=state.pointRate;
@@ -654,7 +654,7 @@ function renderHistory() {
       <tbody>${lifeSorted.map(p=>{
         const top=lifePts[p]===topPts&&topPts>0;
         return `<tr class="${top?'top-row':''}">
-          <td>${esc(p)}${top?'<span class="winner-tag">🏆 Leader</span>':''}</td>
+          <td>${esc(p)}${top?'<span class="winner-tag">ðŸ† Leader</span>':''}</td>
           <td>${lifeRounds[p]}</td>
           <td>${lifePts[p]}</td>
           <td>${fmtMoney(lifePts[p]*rate)}</td>
@@ -686,7 +686,7 @@ function renderHistory() {
           ${Array.from({length:18},(_,j)=>j+1).map(h=>`
             <div class="hole-cell">
               <div class="h-num">${h}</div>
-              <div>${r.scores?.[p]?.[h]??'—'}</div>
+              <div>${r.scores?.[p]?.[h]??'â€”'}</div>
             </div>`).join('')}
         </div>
       </div>`).join('');
@@ -695,9 +695,9 @@ function renderHistory() {
       <div class="history-round-header" onclick="toggleHist('hb-${i}','hc-${i}')">
         <div>
           <div class="history-round-date">${formatDate(r.date)}</div>
-          <div class="history-round-summary">${ps.length} players · Pot: ${fmtMoney(pot)}${winner?' · Winner: '+esc(winner):''}</div>
+          <div class="history-round-summary">${ps.length} players Â· Pot: ${fmtMoney(pot)}${winner?' Â· Winner: '+esc(winner):''}</div>
         </div>
-        <div class="chevron" id="hc-${i}">▼</div>
+        <div class="chevron" id="hc-${i}">â–¼</div>
       </div>
       <div class="history-round-body" id="hb-${i}">
         <table class="hist-table" style="margin-top:.875rem">
@@ -721,7 +721,7 @@ function toggleHist(bodyId, chevId) {
   b.classList.toggle('open'); c.classList.toggle('open');
 }
 
-// ── Players ──────────────────────────────────────────────────
+// â”€â”€ Players â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function renderPlayers() {
   document.getElementById('view-players').innerHTML=`
     <div class="card">
