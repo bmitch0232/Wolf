@@ -1,0 +1,1251 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, interactive-widget=resizes-content" />
+  <title>Central Valley Golf Tracker</title>
+  <link rel="manifest" href="manifest.json" />
+  <link rel="apple-touch-icon" href="icon-192.png" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+  <meta name="apple-mobile-web-app-title" content="CV Golf" />
+  <meta name="theme-color" content="#1a5276" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #f5f3ee;
+      --surface: #ffffff;
+      --surface2: #f0ede6;
+      --border: #d8d4ca;
+      --border2: #c4bfb4;
+      --text: #1a1916;
+      --text2: #6b6760;
+      --text3: #9b9890;
+      --green: #2d6a4f;
+      --green-bg: #d8f3dc;
+      --green-border: #a7d9b8;
+      --red: #991b1b;
+      --red-bg: #fee2e2;
+      --gold: #854d0e;
+      --gold-bg: #fef9c3;
+      --gold-border: #fde047;
+      --radius: 10px;
+      --radius-lg: 14px;
+    }
+
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: #151412;
+        --surface: #1e1c19;
+        --surface2: #272420;
+        --border: #3a3730;
+        --border2: #4a4740;
+        --text: #f0ede6;
+        --text2: #9b9890;
+        --text3: #6b6760;
+        --green: #6ee7b7;
+        --green-bg: #064e3b;
+        --green-border: #065f46;
+        --red: #fca5a5;
+        --red-bg: #7f1d1d;
+        --gold: #fcd34d;
+        --gold-bg: #3d2200;
+        --gold-border: #78350f;
+      }
+    }
+
+    body { font-family: 'Georgia', 'Times New Roman', serif; background: var(--bg); color: var(--text); min-height: 100vh; }
+    /* sc-body handles its own scroll — page scroll not locked */
+
+    header {
+      background: var(--surface); border-bottom: 1px solid var(--border);
+      padding: 1rem 1.25rem 0; position: sticky; top: 0; z-index: 100;
+    }
+    .header-top { display: flex; align-items: center; gap: 10px; margin-bottom: .75rem; }
+    .logo { width: 32px; height: 32px; background: var(--text); border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+    .logo svg { width: 18px; height: 18px; fill: var(--bg); }
+    h1 { font-size: 18px; font-weight: 700; letter-spacing: -0.02em; flex: 1; }
+
+    .sync-badge {
+      font-size: 11px; padding: 3px 9px; border-radius: 99px; font-weight: bold;
+      white-space: nowrap; border: 1px solid;
+    }
+    .sync-badge.connected { background: var(--green-bg); color: var(--green); border-color: var(--green-border); }
+    .sync-badge.offline   { background: var(--surface2); color: var(--text3); border-color: var(--border); }
+    .sync-badge.setup     { background: var(--gold-bg);  color: var(--gold);  border-color: var(--gold-border); }
+    .sync-badge.saving    { background: var(--blue-bg, #dbeafe); color: var(--blue, #1e40af); border-color: #93c5fd; }
+
+    .tab-bar { display: flex; overflow-x: auto; scrollbar-width: none; }
+    .tab-bar::-webkit-scrollbar { display: none; }
+    .tab { padding: 10px 14px; font-size: 13px; font-family: 'Georgia', serif; border: none; background: none; cursor: pointer; border-bottom: 2.5px solid transparent; color: var(--text2); white-space: nowrap; transition: color .15s, border-color .15s; }
+    .tab.active { color: var(--text); border-bottom-color: var(--text); font-weight: bold; }
+    .tab:hover { color: var(--text); }
+
+    .main { max-width: 680px; margin: 0 auto; padding: 1.25rem 1rem; }
+
+    .card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 1rem 1.125rem; margin-bottom: 1rem; }
+
+    .section-label { font-size: 11px; font-weight: bold; letter-spacing: .08em; text-transform: uppercase; color: var(--text3); margin-bottom: .75rem; }
+
+    label { font-size: 13px; color: var(--text2); display: block; margin-bottom: 4px; }
+
+    input, select { width: 100%; padding: 9px 11px; border: 1px solid var(--border); border-radius: var(--radius); font-size: 16px; font-family: 'Georgia', serif; background: var(--surface); color: var(--text); transition: border-color .15s; -webkit-appearance: none; }
+    input:focus, select:focus { outline: none; border-color: var(--border2); }
+
+    .form-row { margin-bottom: .875rem; }
+
+    .btn { padding: 9px 16px; border: 1px solid var(--border); border-radius: var(--radius); background: var(--surface); color: var(--text); font-size: 13px; font-family: 'Georgia', serif; cursor: pointer; transition: background .15s; white-space: nowrap; }
+    .btn:hover { background: var(--surface2); }
+    .btn-primary { background: var(--text); color: var(--bg); border-color: var(--text); }
+    .btn-primary:hover { opacity: .85; }
+    .btn-danger { color: var(--red); border-color: var(--border); }
+    .btn-danger:hover { background: var(--red-bg); }
+    .btn-sm { padding: 5px 11px; font-size: 12px; }
+    .btn-block { width: 100%; text-align: center; }
+
+    .inline-row { display: flex; gap: 8px; align-items: flex-end; }
+    .inline-row > *:first-child { flex: 1; }
+
+    .player-chips { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: .75rem; min-height: 10px; }
+    .chip { display: inline-flex; align-items: center; gap: 6px; background: var(--surface2); border: 1px solid var(--border); border-radius: 99px; padding: 5px 12px; font-size: 13px; }
+    .chip button { border: none; background: none; cursor: pointer; color: var(--text2); font-size: 15px; line-height: 1; padding: 0; }
+
+    /* ── Compact score bar ── */
+    .score-bar {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: .5rem .875rem;
+      margin-bottom: .625rem;
+    }
+    .score-bar-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: .375rem;
+    }
+    .score-bar-label { font-size: 10px; font-weight: bold; letter-spacing: .07em; text-transform: uppercase; color: var(--text3); }
+    .rate-row { display: flex; align-items: center; gap: 5px; font-size: 11px; color: var(--text3); }
+    .rate-row input { width: 58px; padding: 3px 6px; font-size: 13px; text-align: right; border: 1px solid var(--border); border-radius: 6px; background: var(--surface); color: var(--text); font-family: 'Georgia', serif; }
+    .score-bar-grid { display: flex; gap: 6px; }
+
+    /* Combined player card — name, pts, winnings in one compact tile */
+    .player-card { flex: 1; min-width: 0; background: var(--surface2); border: 1px solid var(--border); border-radius: var(--radius); padding: .375rem .5rem; text-align: center; transition: background .2s, border-color .2s; }
+    .player-card.leader { background: var(--green-bg); border-color: var(--green-border); }
+    .player-card.top-earner { background: var(--gold-bg); border-color: var(--gold-border); }
+    .player-card.leader.top-earner { background: var(--green-bg); border-color: var(--green-border); }
+    .pc-name { font-size: 11px; font-weight: bold; color: var(--text2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-bottom: 2px; }
+    .player-card.leader .pc-name { color: var(--green); }
+    .player-card.top-earner .pc-name { color: var(--gold); }
+    .player-card.leader.top-earner .pc-name { color: var(--green); }
+    .pc-pts { font-size: 20px; font-weight: bold; line-height: 1.1; color: var(--text); }
+    .player-card.leader .pc-pts { color: var(--green); }
+    .pc-win { font-size: 11px; color: var(--text2); margin-top: 1px; }
+    .player-card.top-earner .pc-win { color: var(--gold); font-weight: bold; }
+    .player-card.leader.top-earner .pc-win { color: var(--gold); font-weight: bold; }
+
+
+
+    /* ── Scorecard ── */
+    .scorecard-wrap { overflow-x: hidden; }
+    .scorecard { width: 100%; border-collapse: collapse; font-size: 13px; }
+    /* ── Self-contained scorecard scroll box ── */
+    .scorecard-box {
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      overflow: hidden;          /* clip corners */
+      margin-bottom: .875rem;
+    }
+    /* Frozen name row at top of box */
+    .sc-header {
+      display: flex;
+      background: var(--surface);
+      border-bottom: 2px solid var(--border2);
+    }
+    .sc-hole-col  { flex: 0 0 48px; padding: 8px 4px 8px 8px; font-size: 11px; font-weight: bold; color: var(--text3); }
+    .sc-name-col  { flex: 1; padding: 8px 4px; font-size: 12px; font-weight: bold; color: var(--text2); text-align: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    /* Scrollable hole rows */
+    .sc-body {
+      overflow-y: scroll;
+      -webkit-overflow-scrolling: touch;
+      /* svh = small viewport height = measured WITH keyboard open.
+         This never changes when keyboard appears, keeping sc-header visible. */
+      height: 44svh;
+      min-height: 160px;
+      background: var(--surface);
+      overscroll-behavior: contain;
+    }
+    .sc-row {
+      display: flex;
+      border-bottom: 1px solid var(--border);
+      align-items: center;
+    }
+    .sc-row:last-child { border-bottom: none; }
+    .sc-row-hole { flex: 0 0 48px; padding: 6px 4px 6px 8px; font-size: 12px; font-weight: bold; color: var(--text2); }
+    .sc-row-cell { flex: 1; padding: 4px 2px; text-align: center; }
+    /* sticky name bar handled by #sticky-names div */
+    #header-player-bar {
+      display: none;
+      position: fixed;
+      left: 0; right: 0;
+      z-index: 999;
+      background: var(--surface);
+      border-bottom: 2px solid var(--border2);
+      box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+    }
+    .hpb-inner {
+      max-width: 680px;
+      margin: 0 auto;
+      display: flex;
+      padding: 0 1rem;
+    }
+    .hpb-hole { flex: 0 0 38px; min-width: 38px; padding: 7px 4px; font-size: 11px; font-weight: bold; color: var(--text3); }
+    .hpb-name { flex: 1; padding: 7px 4px; font-size: 12px; font-weight: bold; color: var(--text2); text-align: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .scorecard th { padding: 7px 4px; border-bottom: 2px solid var(--border2); font-weight: bold; font-size: 11px; letter-spacing: .03em; color: var(--text2); text-align: center; }
+    .scorecard th.hole-head { text-align: left; color: var(--text3); }
+    .scorecard td { padding: 3px 2px; border-bottom: 1px solid var(--border); text-align: center; vertical-align: middle; }
+    .scorecard td.hole-num { font-size: 12px; color: var(--text2); font-weight: bold; text-align: left; padding-left: 4px; width: 38px; }
+    .pts-input { width: 48px; padding: 5px 2px; text-align: center; border: 1px solid var(--border); border-radius: 6px; font-size: 16px; font-family: 'Georgia', serif; background: var(--surface); color: var(--text); -webkit-appearance: none; -moz-appearance: textfield; }
+    .pts-input::-webkit-inner-spin-button, .pts-input::-webkit-outer-spin-button { -webkit-appearance: none; }
+    .pts-input:focus { outline: none; border-color: var(--border2); background: var(--surface2); }
+
+    /* ── Custom number pad ── */
+    #numpad-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.4);
+      z-index: 500;
+      align-items: flex-end;
+      justify-content: center;
+    }
+    #numpad-overlay.open { display: flex; }
+    #numpad {
+      background: var(--surface);
+      border-radius: 20px 20px 0 0;
+      padding: 1rem 1rem 2rem;
+      width: 100%;
+      max-width: 480px;
+    }
+    #numpad-title {
+      font-size: 13px; color: var(--text2);
+      text-align: center; margin-bottom: .5rem;
+      font-weight: bold;
+    }
+    #numpad-display {
+      font-size: 36px; font-weight: bold;
+      text-align: center; color: var(--text);
+      background: var(--surface2);
+      border-radius: var(--radius);
+      padding: .5rem;
+      margin-bottom: .75rem;
+      min-height: 60px; line-height: 1.2;
+    }
+    .numpad-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+    }
+    .np-btn {
+      padding: 16px;
+      font-size: 22px;
+      font-weight: bold;
+      font-family: 'Georgia', serif;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      background: var(--surface2);
+      color: var(--text);
+      cursor: pointer;
+      text-align: center;
+      -webkit-tap-highlight-color: transparent;
+      user-select: none;
+    }
+    .np-btn:active { background: var(--border2); }
+    .np-btn.np-clear { background: var(--red-bg); color: var(--red); }
+    .np-btn.np-done  { background: var(--text); color: var(--bg); grid-column: span 2; }
+
+    /* Score cell tap target */
+    .sc-score-cell {
+      flex: 1;
+      padding: 8px 2px;
+      text-align: center;
+      cursor: pointer;
+      font-size: 16px;
+      font-weight: bold;
+      color: var(--text);
+      -webkit-tap-highlight-color: rgba(0,0,0,0.05);
+      user-select: none;
+      min-height: 40px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .sc-score-cell:active { background: var(--surface2); }
+    .sc-score-cell.has-score { color: var(--text); }
+    .sc-score-cell.no-score { color: var(--text3); }
+
+    /* ── Round cards ── */
+    .round-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 1rem 1.125rem; margin-bottom: .875rem; }
+    .round-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: .5rem; }
+    .round-title { font-size: 15px; font-weight: bold; }
+    .round-players { font-size: 12px; color: var(--text2); margin-bottom: .625rem; }
+    .round-actions { display: flex; gap: 6px; flex-shrink: 0; }
+    .score-badges { display: flex; flex-wrap: wrap; gap: 5px; }
+    .score-badge { font-size: 12px; font-weight: bold; padding: 3px 9px; border-radius: 99px; background: var(--surface2); color: var(--text); }
+    .score-badge.leader { background: var(--green-bg); color: var(--green); }
+
+    /* ── History ── */
+    .all-time-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 1rem 1.125rem; margin-bottom: 1.25rem; }
+    .hist-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    .hist-table th { text-align: left; padding: 6px 8px; border-bottom: 1px solid var(--border); font-size: 11px; font-weight: bold; letter-spacing: .05em; text-transform: uppercase; color: var(--text3); }
+    .hist-table th:not(:first-child) { text-align: right; }
+    .hist-table td { padding: 8px; border-bottom: 1px solid var(--border); font-size: 13px; }
+    .hist-table td:not(:first-child) { text-align: right; }
+    .hist-table tr:last-child td { border-bottom: none; }
+    .hist-table tr.top-row td { color: var(--gold); font-weight: bold; }
+
+    .history-round { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); margin-bottom: 1rem; overflow: hidden; }
+    .history-round-header { display: flex; justify-content: space-between; align-items: center; padding: .875rem 1rem; cursor: pointer; user-select: none; }
+    .history-round-header:hover { background: var(--surface2); }
+    .history-round-date { font-size: 15px; font-weight: bold; }
+    .history-round-summary { font-size: 12px; color: var(--text2); margin-top: 2px; }
+    .chevron { font-size: 12px; color: var(--text3); transition: transform .2s; }
+    .chevron.open { transform: rotate(180deg); }
+    .history-round-body { display: none; padding: 0 1rem 1rem; border-top: 1px solid var(--border); }
+    .history-round-body.open { display: block; }
+    .winner-tag { display: inline-block; font-size: 10px; font-weight: bold; background: var(--gold-bg); color: var(--gold); border: 1px solid var(--gold-border); border-radius: 99px; padding: 1px 6px; margin-left: 5px; vertical-align: middle; }
+
+    .hole-grid { display: grid; grid-template-columns: repeat(9, 1fr); gap: 3px; margin-top: .5rem; }
+    .hole-cell { background: var(--surface2); border: 1px solid var(--border); border-radius: 4px; padding: 3px 2px; text-align: center; font-size: 11px; }
+    .hole-cell .h-num { color: var(--text3); font-size: 10px; }
+
+    /* ── Settlement table ── */
+    .settlement-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: .875rem 1rem; margin-bottom: .875rem; }
+    .settle-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    .settle-table th { padding: 6px 8px; border-bottom: 1px solid var(--border); font-size: 11px; font-weight: bold; letter-spacing: .05em; text-transform: uppercase; color: var(--text3); text-align: left; }
+    .settle-table th:last-child { text-align: right; }
+    .settle-table td { padding: 8px; border-bottom: 1px solid var(--border); font-size: 13px; vertical-align: middle; }
+    .settle-table td:last-child { text-align: right; font-weight: bold; }
+    .settle-table tr:last-child td { border-bottom: none; }
+    .settle-pays { color: var(--red); }
+    .settle-collects { color: var(--green); font-weight: bold; }
+    .settle-arrow { color: var(--text3); margin: 0 4px; }
+    .settle-even { color: var(--text3); font-style: italic; }
+
+    /* ── New round player grid ── */
+    .nr-player-grid { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: .5rem; }
+    .nr-player-btn {
+      padding: 8px 14px; border: 1px solid var(--border);
+      border-radius: 99px; background: var(--surface2);
+      color: var(--text); font-size: 14px;
+      font-family: 'Georgia', serif; cursor: pointer;
+      transition: background .15s, border-color .15s;
+    }
+    .nr-player-btn:hover { background: var(--green-bg); border-color: var(--green-border); }
+    .nr-player-btn-added {
+      background: var(--green-bg) !important;
+      border-color: var(--green-border) !important;
+      color: var(--green) !important;
+      font-weight: bold;
+    }
+
+    /* ── Setup banner ── */
+    .setup-banner { background: var(--gold-bg); border: 1px solid var(--gold-border); border-radius: var(--radius-lg); padding: 1rem 1.125rem; margin-bottom: 1rem; }
+    .setup-banner h3 { font-size: 14px; font-weight: bold; color: var(--gold); margin-bottom: .5rem; }
+    .setup-banner p { font-size: 13px; color: var(--text2); margin-bottom: .375rem; line-height: 1.6; }
+    .setup-steps { margin: .5rem 0 0 1.25rem; font-size: 13px; color: var(--text2); line-height: 2; }
+    .setup-banner code { font-family: monospace; font-size: 12px; background: var(--surface); border: 1px solid var(--border); border-radius: 4px; padding: 1px 5px; }
+
+    .empty-state { text-align: center; padding: 3rem 1rem; color: var(--text2); font-size: 14px; }
+    .empty-icon { font-size: 2.5rem; margin-bottom: .75rem; }
+    .hint { font-size: 12px; color: var(--text3); margin-top: .5rem; }
+    .player-row { display: flex; justify-content: space-between; align-items: center; padding: .625rem 0; border-bottom: 1px solid var(--border); gap: 8px; }
+    .player-row:last-child { border-bottom: none; }
+    .player-name-display { font-size: 14px; flex: 1; }
+    .player-name-input { flex: 1; font-size: 16px; padding: 6px 10px; border: 1px solid var(--border2); border-radius: var(--radius); font-family: 'Georgia', serif; background: var(--surface); color: var(--text); }
+    .round-select-row { display: flex; align-items: center; margin-bottom: .875rem; gap: 10px; }
+    .round-select-row select { flex: 1; }
+
+    @media (max-width: 480px) {
+      .pts-input { width: 42px; font-size: 16px; }
+      .scorecard th, .scorecard td { padding-left: 1px; padding-right: 1px; }
+      .total-block-pts { font-size: 20px; }
+      .winnings-block-amount { font-size: 17px; }
+      .hole-grid { grid-template-columns: repeat(6, 1fr); }
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="header-top">
+    <div class="logo">
+      <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+        <circle cx="12" cy="5" r="3"/>
+        <path d="M12 8 Q7 12 8 18 H16 Q17 12 12 8Z"/>
+        <rect x="11" y="18" width="2" height="4" rx="1"/>
+      </svg>
+    </div>
+    <h1>Central Valley Golf Tracker</h1>
+    <span class="sync-badge setup" id="sync-badge">⚙ Setup</span>
+  </div>
+  <nav class="tab-bar">
+    <button class="tab active" onclick="showTab('rounds')"    id="tab-rounds">Rounds</button>
+    <button class="tab"        onclick="showTab('new-round')" id="tab-new-round">New Round</button>
+    <button class="tab"        onclick="showTab('scorecard')" id="tab-scorecard">Scorecard</button>
+    <button class="tab"        onclick="showTab('history')"   id="tab-history">History</button>
+    <button class="tab"        onclick="showTab('players')"   id="tab-players">Players</button>
+  </nav>
+</header>
+<div id="header-player-bar"><div class="hpb-inner" id="hpb-inner"></div></div>
+<div id="name-bar-fixed"><div class="name-bar-inner" id="name-bar-inner"></div></div>
+
+<div id="numpad-overlay" onclick="npOverlayClick(event)">
+  <div id="numpad">
+    <div id="numpad-title">Hole <span id="np-hole"></span> — <span id="np-player"></span></div>
+    <div id="numpad-display">—</div>
+    <div class="numpad-grid">
+      <button class="np-btn" ontouchend="event.preventDefault();npTap('1')" onclick="npTap('1')">1</button>
+      <button class="np-btn" ontouchend="event.preventDefault();npTap('2')" onclick="npTap('2')">2</button>
+      <button class="np-btn" ontouchend="event.preventDefault();npTap('3')" onclick="npTap('3')">3</button>
+      <button class="np-btn" ontouchend="event.preventDefault();npTap('4')" onclick="npTap('4')">4</button>
+      <button class="np-btn" ontouchend="event.preventDefault();npTap('5')" onclick="npTap('5')">5</button>
+      <button class="np-btn" ontouchend="event.preventDefault();npTap('6')" onclick="npTap('6')">6</button>
+      <button class="np-btn" ontouchend="event.preventDefault();npTap('7')" onclick="npTap('7')">7</button>
+      <button class="np-btn" ontouchend="event.preventDefault();npTap('8')" onclick="npTap('8')">8</button>
+      <button class="np-btn" ontouchend="event.preventDefault();npTap('9')" onclick="npTap('9')">9</button>
+      <button class="np-btn np-clear" ontouchend="event.preventDefault();npTap('clear')" onclick="npTap('clear')">⌫</button>
+      <button class="np-btn" ontouchend="event.preventDefault();npTap('0')" onclick="npTap('0')">0</button>
+      <button class="np-btn np-done" ontouchend="event.preventDefault();npDone()" onclick="npDone()">Done ✓</button>
+    </div>
+  </div>
+</div>
+<main class="main">
+  <div id="view-rounds"></div>
+  <div id="view-new-round" style="display:none"></div>
+  <div id="view-scorecard" style="display:none"></div>
+  <div id="view-history"   style="display:none"></div>
+  <div id="view-players"   style="display:none"></div>
+</main>
+
+<script>
+// ═══════════════════════════════════════════════════════════════
+// 🔧  PASTE YOUR GOOGLE APPS SCRIPT WEB APP URL HERE
+//     Leave blank to run in local-only mode.
+// ═══════════════════════════════════════════════════════════════
+const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzYfEFwVqbqToK-ZKB9gLcdZlvpnjtObuIqQKdtP3UWpw1K4IuS8Jtm50WL4h3quxKo/exec";
+// ═══════════════════════════════════════════════════════════════
+
+const DEFAULT_RATE = 0.25;
+
+let state = {
+  players:      [],
+  rounds:       [],
+  currentRound: null,
+  activeTab:    'rounds',
+  pointRate:    DEFAULT_RATE,
+  gsConnected:  false
+};
+let newRoundPlayers = [];
+let debounceTimers  = {};
+
+// ── Local storage ────────────────────────────────────────────
+function localSave() {
+  try { localStorage.setItem('central_valley_golf', JSON.stringify(state)); } catch(e) {}
+}
+function localLoad() {
+  try {
+    const s = JSON.parse(localStorage.getItem('central_valley_golf') || '{}');
+    state.players   = s.players   || [];
+    state.rounds    = s.rounds    || [];
+    state.pointRate = s.pointRate ?? DEFAULT_RATE;
+  } catch(e) {}
+}
+
+// ── Google Sheets helpers ─────────────────────────────────────
+function gsConfigured() { return APPS_SCRIPT_URL && APPS_SCRIPT_URL.startsWith('https://'); }
+
+// JSONP GET — bypasses CORS by injecting a <script> tag
+function gsGet(action) {
+  return new Promise((resolve) => {
+    const cbName = 'gs_cb_' + Date.now();
+    const script = document.createElement('script');
+    const timer = setTimeout(() => { cleanup(); resolve(null); }, 10000);
+    function cleanup() {
+      clearTimeout(timer);
+      delete window[cbName];
+      if (script.parentNode) script.parentNode.removeChild(script);
+    }
+    window[cbName] = function(data) { cleanup(); resolve(data); };
+    script.src = APPS_SCRIPT_URL + '?action=' + action + '&callback=' + cbName;
+    script.onerror = () => { cleanup(); resolve(null); };
+    document.head.appendChild(script);
+  });
+}
+
+// POST via no-cors (writes only — response not readable but data saves fine)
+async function gsPost(payload) {
+  if (!gsConfigured()) return null;
+  try {
+    await fetch(APPS_SCRIPT_URL, {
+      method: 'POST',
+      mode: 'no-cors',
+      headers: { 'Content-Type': 'text/plain' },
+      body: JSON.stringify(payload)
+    });
+    return { ok: true };
+  } catch(e) { console.error('GS post error:', e); return null; }
+}
+
+async function gsLoadAll() {
+  const data = await gsGet('loadAll');
+  if (!data || data.error) { console.error('gsLoadAll:', data); return null; }
+  return data;
+}
+
+async function gsSaveRound(round) {
+  return await gsPost({ action: 'saveRound', round });
+}
+
+async function gsDeleteRound(id) {
+  return await gsPost({ action: 'deleteRound', id });
+}
+
+async function gsSaveMeta(players, pointRate) {
+  return await gsPost({ action: 'saveMeta', players, pointRate });
+}
+
+// ── Badge helper ─────────────────────────────────────────────
+function setBadge(text, cls) {
+  const b = document.getElementById('sync-badge');
+  b.textContent = text;
+  b.className = 'sync-badge ' + cls;
+}
+
+// ── Init ─────────────────────────────────────────────────────
+async function init() {
+  localLoad();
+
+  if (!gsConfigured()) {
+    setBadge('⚙ Setup needed', 'setup');
+    render();
+    return;
+  }
+
+  setBadge('↻ Loading…', 'offline');
+  const data = await gsLoadAll();
+  if (data) {
+    state.rounds    = data.rounds    || [];
+    state.players   = data.players   || [];
+    state.pointRate = data.pointRate ?? DEFAULT_RATE;
+    localSave();
+    state.gsConnected = true;
+    setBadge('📊 Sheets', 'connected');
+  } else {
+    setBadge('📱 Local only', 'offline');
+  }
+  render();
+}
+
+// ── Save helpers ─────────────────────────────────────────────
+async function saveRound(round) {
+  localSave();
+  if (state.gsConnected) {
+    setBadge('↑ Saving…', 'saving');
+    await gsSaveRound(round);
+    setBadge('📊 Sheets', 'connected');
+  }
+}
+
+async function saveMeta() {
+  localSave();
+  if (state.gsConnected) await gsSaveMeta(state.players, state.pointRate);
+}
+
+// ── Tab routing ──────────────────────────────────────────────
+function showTab(tab) {
+  ['rounds','new-round','scorecard','history','players'].forEach(t => {
+    document.getElementById('view-'+t).style.display = 'none';
+    document.getElementById('tab-'+t).classList.remove('active');
+  });
+  document.getElementById('view-'+tab).style.display = 'block';
+  document.getElementById('tab-'+tab).classList.add('active');
+  state.activeTab = tab;
+  if (tab === 'scorecard') {
+    document.body.classList.add('scorecard-active');
+    const hdr = document.querySelector('header');
+    if (hdr) document.documentElement.style.setProperty('--header-h', hdr.getBoundingClientRect().height + 'px');
+  } else {
+    document.body.classList.remove('scorecard-active');
+  }
+  renderTab(tab);
+}
+function render() { renderTab(state.activeTab); }
+function renderTab(tab) {
+  if (tab==='rounds')    renderRounds();
+  if (tab==='new-round') renderNewRound();
+  if (tab==='scorecard') renderScorecard();
+  if (tab==='history')   renderHistory();
+  if (tab==='players')   renderPlayers();
+}
+
+// ── Helpers ──────────────────────────────────────────────────
+function today() {
+  // Return YYYY-MM-DD in Central Time
+  return new Date().toLocaleDateString('en-CA', { timeZone: 'America/Chicago' });
+}
+
+function nowCT() {
+  // Return current date + time string in Central Time
+  const d = new Date();
+  const date = d.toLocaleDateString('en-US', { timeZone: 'America/Chicago', month: 'short', day: 'numeric', year: 'numeric' });
+  const time = d.toLocaleTimeString('en-US', { timeZone: 'America/Chicago', hour: 'numeric', minute: '2-digit', hour12: true });
+  return date + ' at ' + time + ' CT';
+}
+
+function formatDate(d) {
+  if (!d) return 'Unknown date';
+  // Handle full ISO strings, timestamps, or YYYY-MM-DD
+  if (typeof d === 'number' || (typeof d === 'string' && d.length > 10 && !d.includes('-'))) {
+    // It's a timestamp number or non-standard string — parse as date
+    const dt = new Date(d);
+    if (isNaN(dt)) return 'Unknown date';
+    return dt.toLocaleDateString('en-US', { timeZone: 'America/Chicago', month: 'short', day: 'numeric', year: 'numeric' });
+  }
+  if (typeof d === 'string' && d.includes('T')) {
+    // ISO string like 2026-04-23T00:00:00Z
+    const dt = new Date(d);
+    if (isNaN(dt)) return 'Unknown date';
+    return dt.toLocaleDateString('en-US', { timeZone: 'America/Chicago', month: 'short', day: 'numeric', year: 'numeric' });
+  }
+  // Standard YYYY-MM-DD
+  const parts = String(d).split('-');
+  if (parts.length !== 3) return String(d);
+  const [y, m, day] = parts;
+  const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  const mIdx = parseInt(m) - 1;
+  if (mIdx < 0 || mIdx > 11) return String(d);
+  return months[mIdx] + ' ' + parseInt(day) + ', ' + y;
+}
+
+function formatDateTime(r) {
+  // Show startedAt if available, otherwise just date
+  if (r.startedAt) {
+    return formatDate(r.date) + ' <span style="font-size:11px;color:var(--text3)">Started ' + r.startedAt + '</span>';
+  }
+  return formatDate(r.date);
+}
+function esc(s) {
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+function safeId(rid,name) { return rid+'-'+String(name).replace(/[^a-z0-9]/gi,'_'); }
+function calcTotals(round) {
+  const t={};
+  (round.players||[]).forEach(p=>{
+    t[p]=0;
+    for(let h=1;h<=18;h++) t[p]+=Number(round.scores?.[p]?.[h]||0);
+  });
+  return t;
+}
+function fmtMoney(n) { return '$'+n.toFixed(2); }
+
+// Returns the rate for a specific round.
+// If round has no rate yet (old rounds), stamps it with global default so it's explicit.
+function roundRate(round) {
+  if (!round) return state.pointRate;
+  if (round.pointRate == null) {
+    // Stamp old rounds with the global default rate so they have their own rate
+    round.pointRate = state.pointRate;
+  }
+  return Number(round.pointRate);
+}
+
+// Head-to-head settlement: every player pair settles independently
+function calcSettlement(round) {
+  const players = round.players || [];
+  const totals  = calcTotals(round);
+  const rate    = roundRate(round);
+  const results = []; // { payer, payee, amount }
+
+  for (let i = 0; i < players.length; i++) {
+    for (let j = i + 1; j < players.length; j++) {
+      const a = players[i], b = players[j];
+      const diff = (totals[a] - totals[b]) * rate;
+      if (diff > 0) {
+        results.push({ payer: b, payee: a, amount: diff });
+      } else if (diff < 0) {
+        results.push({ payer: a, payee: b, amount: Math.abs(diff) });
+      }
+    }
+  }
+  return results;
+}
+
+// Net position per player (positive = collects, negative = owes)
+function calcNetPositions(round) {
+  const players = round.players || [];
+  const totals  = calcTotals(round);
+  const rate    = roundRate(round);
+  const net     = {};
+  players.forEach(p => net[p] = 0);
+
+  for (let i = 0; i < players.length; i++) {
+    for (let j = i + 1; j < players.length; j++) {
+      const a = players[i], b = players[j];
+      const diff = (totals[a] - totals[b]) * rate;
+      net[a] += diff;
+      net[b] -= diff;
+    }
+  }
+  return net;
+}
+
+// ── Setup banner ─────────────────────────────────────────────
+function setupBanner() {
+  if (gsConfigured()) return '';
+  return `<div class="setup-banner">
+    <h3>📊 Connect Google Sheets to save your data</h3>
+    <p>Data currently saves to this browser only. Follow the setup guide (<code>SHEETS_SETUP.md</code>) to enable cloud sync, then paste your Web App URL into <code>index.html</code>.</p>
+  </div>`;
+}
+
+// ── Rounds ───────────────────────────────────────────────────
+function renderRounds() {
+  const el = document.getElementById('view-rounds');
+  const sorted = [...state.rounds].sort((a,b)=>new Date(b.date)-new Date(a.date));
+  if (!sorted.length) {
+    el.innerHTML = setupBanner()+`<div class="empty-state"><div class="empty-icon">⛳</div><div>No rounds yet.</div><div style="margin-top:.5rem">Hit <strong>New Round</strong> to get started.</div></div>`;
+    return;
+  }
+  el.innerHTML = setupBanner()+sorted.map(r=>{
+    const t=calcTotals(r), maxP=Math.max(0,...Object.values(t));
+    return `<div class="round-card">
+      <div class="round-header">
+        <div class="round-title">${formatDate(r.date)}</div>
+        ${r.startedAt ? `<div style="font-size:11px;color:var(--text3);margin-top:2px">Started ${r.startedAt}</div>` : ''}
+        <div class="round-actions">
+          <button class="btn btn-sm" onclick="openRound('${r.id}')">Edit</button>
+          <button class="btn btn-sm btn-danger" onclick="deleteRound('${r.id}')">Delete</button>
+        </div>
+      </div>
+      <div class="round-players">Players: ${(r.players||[]).map(esc).join(' · ')}</div>
+      <div class="score-badges">
+        ${(r.players||[]).map(p=>`<span class="score-badge${t[p]===maxP&&maxP>0?' leader':''}">${esc(p)}: ${t[p]} pts · ${fmtMoney(t[p]*roundRate(r))}</span>`).join('')}
+      </div>
+    </div>`;
+  }).join('');
+}
+
+async function deleteRound(id) {
+  if (!confirm('Delete this round? This cannot be undone.')) return;
+  state.rounds = state.rounds.filter(r=>r.id!==id);
+  if (state.currentRound===id) state.currentRound=null;
+  localSave();
+  if (state.gsConnected) await gsDeleteRound(id);
+  render();
+}
+function openRound(id) { state.currentRound=id; showTab('scorecard'); }
+
+// ── New Round ────────────────────────────────────────────────
+function renderNewRound() {
+  // Available players = saved players not yet added to this round
+  const available = state.players.filter(p => !newRoundPlayers.includes(p));
+  const hasPlayers = state.players.length > 0;
+
+  document.getElementById('view-new-round').innerHTML=`
+    <div class="card">
+      <div class="section-label">Round details</div>
+      <div class="form-row"><label>Date</label><input id="nr-date" type="date" value="${today()}" /></div>
+    </div>
+    <div class="card">
+      <div class="section-label">Players in this round</div>
+      <div class="player-chips" id="nr-chips">
+        ${newRoundPlayers.length
+          ? newRoundPlayers.map(p=>`<span class="chip">${esc(p)}<button onclick="removeNRP('${esc(p)}')">×</button></span>`).join('')
+          : `<span style="font-size:13px;color:var(--text3)">No players added yet</span>`}
+      </div>
+
+      ${hasPlayers ? `
+      <div class="section-label" style="margin-top:.875rem">Add from saved players</div>
+      <div class="nr-player-grid">
+        ${state.players.map(p => {
+          const added = newRoundPlayers.includes(p);
+          return `<button class="nr-player-btn${added?' nr-player-btn-added':''}"
+            onclick="${added ? `removeNRP('${esc(p)}')` : `addNRPByName('${esc(p)}')`}">
+            ${esc(p)}${added?' ✓':''}
+          </button>`;
+        }).join('')}
+      </div>` : ''}
+
+      <div class="section-label" style="margin-top:.875rem">Add new player</div>
+      <div class="inline-row">
+        <div><input id="nr-pi" placeholder="New player name" autocomplete="off"
+          onkeydown="if(event.key==='Enter'){event.preventDefault();addNRP()}" /></div>
+        <button class="btn" onclick="addNRP()">Add</button>
+      </div>
+      <p class="hint">New players are saved for future rounds.</p>
+    </div>
+    <button class="btn btn-primary btn-block" onclick="createRound()">Start Round ›</button>`;
+}
+
+function addNRPByName(name) {
+  if (!newRoundPlayers.includes(name)) newRoundPlayers.push(name);
+  renderNewRound();
+}
+
+function removeNRP(name) { newRoundPlayers=newRoundPlayers.filter(p=>p!==name); renderNewRound(); }
+function addNRP() {
+  const inp=document.getElementById('nr-pi'), name=inp.value.trim();
+  if (!name||newRoundPlayers.includes(name)){inp.value='';return;}
+  newRoundPlayers.push(name);
+  if (!state.players.includes(name)){state.players.push(name); saveMeta();}
+  inp.value=''; renderNewRound();
+}
+async function createRound() {
+  const date=document.getElementById('nr-date').value||today();
+  if (!newRoundPlayers.length){alert('Add at least one player.');return;}
+  const id='r'+Date.now(), scores={};
+  newRoundPlayers.forEach(p=>scores[p]={});
+  const round={id,date,startedAt:nowCT(),pointRate:state.pointRate,players:[...newRoundPlayers],scores};
+  state.rounds.push(round);
+  state.currentRound=id;
+  newRoundPlayers=[];
+  await saveRound(round);
+  showTab('scorecard');
+}
+
+// ── Scorecard ────────────────────────────────────────────────
+function renderScorecard() {
+  const el=document.getElementById('view-scorecard');
+  if (!state.rounds.length){el.innerHTML=`<div class="empty-state"><div class="empty-icon">📋</div><div>No rounds yet.</div></div>`;return;}
+  if (!state.currentRound||!state.rounds.find(r=>r.id===state.currentRound))
+    state.currentRound=state.rounds.slice().sort((a,b)=>new Date(b.date)-new Date(a.date))[0].id;
+
+  const round=state.rounds.find(r=>r.id===state.currentRound);
+  const players=round.players||[];
+  const totals=calcTotals(round);
+  const maxP=Math.max(0,...Object.values(totals));
+  const rate=roundRate(round);
+  const maxW=Math.max(0,...players.map(p=>totals[p]*rate));
+
+  const cardHtml=players.map(p=>{
+    const ldr=totals[p]===maxP&&maxP>0;
+    const amt=totals[p]*rate, top=amt===maxW&&maxW>0;
+    const cls=(ldr&&top)?'leader top-earner':ldr?'leader':top?'top-earner':'';
+    return `<div class="player-card${cls?' '+cls:''}" id="pc-${safeId(round.id,p)}">
+      <div class="pc-name">${esc(p)}</div>
+      <div class="pc-pts" id="pc-pts-${safeId(round.id,p)}">${totals[p]||'—'}</div>
+      <div class="pc-win" id="pc-win-${safeId(round.id,p)}">${fmtMoney(amt)}</div>
+    </div>`;
+  }).join('');
+
+  let scRows='';
+  for(let h=1;h<=18;h++){
+    scRows+=`<div class="sc-row">
+      <div class="sc-row-hole">${h}</div>
+      ${players.map(p=>{
+        const v=round.scores?.[p]?.[h];
+        const display=(v!==undefined&&v!==''&&v!==null)?v:'—';
+        const hasSc=(v!==undefined&&v!==''&&v!==null)?'has-score':'no-score';
+        return `<div class="sc-score-cell ${hasSc}" id="sc-${safeId(round.id,p)}-${h}"
+          ontouchend="event.preventDefault();openNumpad('${round.id}','${p}',${h})"
+          onclick="openNumpad('${round.id}','${p}',${h})">${display}</div>`;
+      }).join('')}
+    </div>`;
+  }
+
+    const settlementHTML = buildSettlementHTML(round);
+  el.innerHTML=`
+    <div class="round-select-row">
+      <select onchange="switchRound(this.value)">
+        ${state.rounds.slice().sort((a,b)=>new Date(b.date)-new Date(a.date))
+          .map(r=>`<option value="${r.id}"${r.id===state.currentRound?' selected':''}>${formatDate(r.date)}${r.startedAt?' — '+r.startedAt:''}</option>`).join('')}
+      </select>
+    </div>
+    <div class="score-bar">
+      <div class="score-bar-top">
+        <div class="score-bar-label">Pts · Winnings</div>
+        <div class="rate-row">
+          <span>$/pt:</span>
+          <input type="number" min="0.01" step="0.01" value="${rate.toFixed(2)}" onchange="updateRate(this.value)"/>
+        </div>
+      </div>
+      <div class="score-bar-grid">${cardHtml}</div>
+    </div>
+    <div class="scorecard-box">
+      <div class="sc-header">
+        <div class="sc-hole-col">Hole</div>
+        ${players.map(p=>`<div class="sc-name-col">${esc(p)}</div>`).join('')}
+      </div>
+      <div class="sc-body">
+        ${scRows}
+      </div>
+    </div>
+    <p class="hint" style="margin-top:.625rem">Enter points per hole — totals and winnings update instantly.</p>
+    <div class="settlement-card" id="settlement-${round.id}" style="margin-top:.875rem">
+      <div class="banner-label">Payments &amp; Settlement</div>
+      ${settlementHTML}
+    </div>`;
+
+  // scorecard box handles its own layout
+}
+
+function liveScore(rid,player,hole,val) {
+  const round=state.rounds.find(r=>r.id===rid); if(!round) return;
+  if(!round.scores[player]) round.scores[player]={};
+  round.scores[player][hole]=val===''?'':Number(val);
+  localSave();
+  clearTimeout(debounceTimers[rid]);
+  debounceTimers[rid]=setTimeout(()=>saveRound(round),1000);
+  const t=calcTotals(round), maxP=Math.max(0,...Object.values(t));
+  refreshCards(round);
+}
+function buildSettlementHTML(round) {
+  const players  = round.players || [];
+  if (players.length < 2) return '<div style="font-size:13px;color:var(--text3)">Add at least 2 players to see settlement.</div>';
+  const totals   = calcTotals(round);
+  const hasScores = Object.values(totals).some(v => v > 0);
+  if (!hasScores) return '<div style="font-size:13px;color:var(--text3)">Enter scores to see settlement.</div>';
+
+  const settlement = calcSettlement(round);
+  const net        = calcNetPositions(round);
+
+  // Net summary per player
+  const netRows = players.slice().sort((a,b) => net[b]-net[a]).map(p => {
+    const n = net[p];
+    const cls = n > 0 ? 'settle-collects' : n < 0 ? 'settle-pays' : 'settle-even';
+    const label = n > 0 ? '+ '+fmtMoney(n) : n < 0 ? '− '+fmtMoney(Math.abs(n)) : 'Even';
+    return `<tr><td>${esc(p)}</td><td class="${cls}">${label}</td></tr>`;
+  }).join('');
+
+  // Head-to-head breakdown
+  const h2hRows = settlement.map(s =>
+    `<tr>
+      <td>${esc(s.payer)}<span class="settle-arrow">→</span>${esc(s.payee)}</td>
+      <td class="settle-pays">${fmtMoney(s.amount)}</td>
+    </tr>`
+  ).join('');
+
+  return `
+    <div class="banner-label" style="margin-bottom:.5rem">Payments</div>
+    <table class="settle-table" style="margin-bottom:.875rem">
+      <thead><tr><th>Pays → Collects</th><th>Amount</th></tr></thead>
+      <tbody>${h2hRows}</tbody>
+    </table>
+    <div class="banner-label" style="margin-bottom:.5rem">Net per Player</div>
+    <table class="settle-table">
+      <thead><tr><th>Player</th><th>Net</th></tr></thead>
+      <tbody>${netRows}</tbody>
+    </table>`;
+}
+
+function showNameBar(players) {
+  const bar   = document.getElementById('name-bar-fixed');
+  const inner = document.getElementById('name-bar-inner');
+  if (!bar || !inner) return;
+  if (!players || !players.length) { bar.style.display='none'; return; }
+  // Position fixed bar just below the header
+  const hdr = document.querySelector('header');
+  const top  = hdr ? Math.ceil(hdr.getBoundingClientRect().bottom) : 0;
+  bar.style.top = top + 'px';
+  bar.style.display = 'block';
+  inner.innerHTML = '<div class="name-bar-hole">Hole</div>' +
+    players.map(p => `<div class="name-bar-player">${esc(p)}</div>`).join('');
+  // Make the spacer the same height as the bar so content isn't hidden
+  const spacer = document.querySelector('.name-bar-spacer');
+  if (spacer) spacer.style.height = bar.getBoundingClientRect().height + 'px';
+}
+
+function hideNameBar() {
+  const bar = document.getElementById('name-bar-fixed');
+  if (bar) bar.style.display = 'none';
+}
+
+// On orientation change, reposition the bar
+window.addEventListener('orientationchange', function() {
+  setTimeout(function() {
+    const inner = document.getElementById('name-bar-inner');
+    if (inner && inner.innerHTML) {
+      const hdr = document.querySelector('header');
+      const bar = document.getElementById('name-bar-fixed');
+      if (bar && hdr) bar.style.top = Math.ceil(hdr.getBoundingClientRect().bottom) + 'px';
+    }
+  }, 300);
+});
+
+function updateHeaderPlayerBar(players) {
+  // No longer used - player names are in sticky thead inside scroll container
+  const bar = document.getElementById('header-player-bar');
+  if (bar) bar.style.display = 'none';
+}
+
+function refreshCards(round) {
+  const t=calcTotals(round), rate=roundRate(round);
+  const maxP=Math.max(0,...Object.values(t));
+  const maxW=Math.max(0,...round.players.map(p=>t[p]*rate));
+  round.players.forEach(p=>{
+    const card=document.getElementById('pc-'+safeId(round.id,p)); if(!card) return;
+    const ldr=t[p]===maxP&&maxP>0;
+    const amt=t[p]*rate, top=amt===maxW&&maxW>0;
+    const cls=(ldr&&top)?'leader top-earner':ldr?'leader':top?'top-earner':'';
+    card.className='player-card'+(cls?' '+cls:'');
+    const ptsEl=document.getElementById('pc-pts-'+safeId(round.id,p));
+    const winEl=document.getElementById('pc-win-'+safeId(round.id,p));
+    if(ptsEl) ptsEl.textContent=t[p]||'—';
+    if(winEl) winEl.textContent=fmtMoney(amt);
+  });
+  const sc=document.getElementById('settlement-'+round.id);
+  if(sc) sc.innerHTML='<div class="banner-label">Payments &amp; Settlement</div>'+buildSettlementHTML(round);
+}
+function refreshWin(round) { refreshCards(round); }
+async function updateRate(val) {
+  const n=parseFloat(val); if(isNaN(n)||n<=0) return;
+  const round=state.rounds.find(r=>r.id===state.currentRound);
+  if(!round) return;
+  // Save rate ONLY to this round — never touch other rounds or global rate
+  round.pointRate=n;
+  // saveRound handles both localSave and Google Sheets
+  await saveRound(round);
+  refreshWin(round);
+}
+function switchRound(id){state.currentRound=id;renderScorecard();}
+
+// ── History ──────────────────────────────────────────────────
+function renderHistory() {
+  const el=document.getElementById('view-history');
+  if (!state.rounds.length){
+    el.innerHTML=`<div class="empty-state"><div class="empty-icon">📖</div><div>No rounds in history yet.</div></div>`;
+    return;
+  }
+  const sorted=[...state.rounds].sort((a,b)=>new Date(b.date)-new Date(a.date));
+
+  // All-time — use each round's own rate for accurate winnings
+  const allP=[...new Set(sorted.flatMap(r=>r.players||[]))];
+  const lifePts={}, lifeRounds={}, lifeWin={};
+  allP.forEach(p=>{lifePts[p]=0;lifeRounds[p]=0;lifeWin[p]=0;});
+  sorted.forEach(r=>{
+    const t=calcTotals(r), rr=roundRate(r);
+    (r.players||[]).forEach(p=>{
+      lifePts[p]=(lifePts[p]||0)+t[p];
+      lifeRounds[p]=(lifeRounds[p]||0)+1;
+      lifeWin[p]=(lifeWin[p]||0)+(t[p]*rr);
+    });
+  });
+  const lifeSorted=allP.slice().sort((a,b)=>lifePts[b]-lifePts[a]);
+  const topPts=lifePts[lifeSorted[0]]||0;
+
+  const allTimeHtml=`<div class="all-time-card">
+    <div class="section-label">All-Time Leaderboard</div>
+    <table class="hist-table">
+      <thead><tr><th>Player</th><th>Rounds</th><th>Total Pts</th><th>Winnings</th></tr></thead>
+      <tbody>${lifeSorted.map(p=>{
+        const top=lifePts[p]===topPts&&topPts>0;
+        return `<tr class="${top?'top-row':''}">
+          <td>${esc(p)}${top?'<span class="winner-tag">🏆 Leader</span>':''}</td>
+          <td>${lifeRounds[p]}</td>
+          <td>${lifePts[p]}</td>
+          <td>${fmtMoney(lifeWin[p]||0)}</td>
+        </tr>`;
+      }).join('')}</tbody>
+    </table>
+  </div>`;
+
+  const roundsHtml=sorted.map((r,i)=>{
+    const t=calcTotals(r);
+    const rr=roundRate(r);
+    const ps=(r.players||[]).slice().sort((a,b)=>t[b]-t[a]);
+    const maxP=Math.max(0,...Object.values(t));
+    const pot=ps.reduce((s,p)=>s+t[p]*rr,0);
+    const winner=ps[0]&&t[ps[0]]===maxP&&maxP>0?ps[0]:null;
+    const rateLabel='$'+rr.toFixed(2)+'/pt';
+
+    const playerRows=ps.map(p=>{
+      const isW=t[p]===maxP&&maxP>0;
+      return `<tr class="${isW?'top-row':''}">
+        <td>${esc(p)}${isW?'<span class="winner-tag">Winner</span>':''}</td>
+        <td>${t[p]}</td>
+        <td>${fmtMoney(t[p]*rr)}</td>
+      </tr>`;
+    }).join('');
+
+    const holeGrids=ps.map(p=>`
+      <div style="margin-top:.875rem">
+        <div style="font-size:11px;font-weight:bold;color:var(--text3);text-transform:uppercase;letter-spacing:.05em;margin-bottom:4px">${esc(p)}</div>
+        <div class="hole-grid">
+          ${Array.from({length:18},(_,j)=>j+1).map(h=>`
+            <div class="hole-cell">
+              <div class="h-num">${h}</div>
+              <div>${r.scores?.[p]?.[h]??'—'}</div>
+            </div>`).join('')}
+        </div>
+      </div>`).join('');
+
+    return `<div class="history-round">
+      <div class="history-round-header" onclick="toggleHist('hb-${i}','hc-${i}')">
+        <div>
+          <div class="history-round-date">${formatDate(r.date)}</div>
+          ${r.startedAt ? `<div style="font-size:11px;color:var(--text3);margin-top:1px">Started ${r.startedAt}</div>` : ''}
+          <div class="history-round-summary">${rateLabel} · ${ps.length} players · Pot: ${fmtMoney(pot)}${winner?' · Winner: '+esc(winner):''}</div>
+        </div>
+        <div class="chevron" id="hc-${i}">▼</div>
+      </div>
+      <div class="history-round-body" id="hb-${i}">
+        <table class="hist-table" style="margin-top:.875rem">
+          <thead><tr><th>Player</th><th>Points</th><th>Winnings</th></tr></thead>
+          <tbody>${playerRows}</tbody>
+        </table>
+        <div style="margin-top:.75rem">
+          <div class="banner-label" style="margin-bottom:.5rem">Settlement</div>
+          ${buildSettlementHTML(r)}
+        </div>
+        <div style="margin-top:.75rem">
+          <div class="banner-label" style="margin-top:.75rem">Hole-by-Hole</div>
+          ${holeGrids}
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+
+  el.innerHTML=allTimeHtml+`<div class="section-label" style="margin-bottom:.625rem">Round History</div>`+roundsHtml;
+}
+
+function toggleHist(bodyId, chevId) {
+  const b=document.getElementById(bodyId), c=document.getElementById(chevId);
+  if(!b) return;
+  b.classList.toggle('open'); c.classList.toggle('open');
+}
+
+// ── Players ──────────────────────────────────────────────────
+function renderPlayers() {
+  document.getElementById('view-players').innerHTML=`
+    <div class="card">
+      <div class="section-label">Saved players (${state.players.length})</div>
+      ${state.players.length
+        ? state.players.map((p,i)=>`
+          <div class="player-row" id="pr-${i}">
+            <span class="player-name-display" id="pnd-${i}">${esc(p)}</span>
+            <input class="player-name-input" id="pni-${i}" value="${esc(p)}" style="display:none"
+              onkeydown="if(event.key==='Enter'){event.preventDefault();savePlayerEdit(${i})}" />
+            <div style="display:flex;gap:6px;flex-shrink:0">
+              <button class="btn btn-sm" id="edit-btn-${i}" onclick="startEditPlayer(${i})">Edit</button>
+              <button class="btn btn-sm" id="save-btn-${i}" style="display:none" onclick="savePlayerEdit(${i})">Save</button>
+              <button class="btn btn-sm btn-danger" id="del-btn-${i}" onclick="deletePlayer('${esc(p)}')">Remove</button>
+            </div>
+          </div>`).join('')
+        : `<div style="font-size:14px;color:var(--text2);padding:.25rem 0">No saved players yet.</div>`}
+    </div>
+    <div class="card">
+      <div class="section-label">Add player</div>
+      <div class="inline-row">
+        <div><input id="npi" placeholder="Player name" onkeydown="if(event.key==='Enter'){event.preventDefault();addPlayer()}" /></div>
+        <button class="btn" onclick="addPlayer()">Add</button>
+      </div>
+    </div>`;
+}
+
+function startEditPlayer(i) {
+  document.getElementById('pnd-'+i).style.display = 'none';
+  document.getElementById('pni-'+i).style.display = 'block';
+  document.getElementById('edit-btn-'+i).style.display = 'none';
+  document.getElementById('save-btn-'+i).style.display = 'inline-block';
+  document.getElementById('pni-'+i).focus();
+  document.getElementById('pni-'+i).select();
+}
+
+async function savePlayerEdit(i) {
+  const inp = document.getElementById('pni-'+i);
+  if (!inp) return;
+  const oldName = state.players[i];
+  const newName = inp.value.trim();
+  if (!newName || newName === oldName) { renderPlayers(); return; }
+  if (state.players.includes(newName)) { alert('A player with that name already exists.'); return; }
+
+  // Update player list
+  state.players[i] = newName;
+
+  // Update the name in all rounds that include this player
+  state.rounds.forEach(r => {
+    const pi = (r.players || []).indexOf(oldName);
+    if (pi !== -1) {
+      r.players[pi] = newName;
+      if (r.scores && r.scores[oldName] !== undefined) {
+        r.scores[newName] = r.scores[oldName];
+        delete r.scores[oldName];
+      }
+    }
+  });
+
+  // Save everything
+  localSave();
+  await saveMeta();
+  // Save all affected rounds to Sheets
+  if (state.gsConnected) {
+    const affected = state.rounds.filter(r => (r.players||[]).includes(newName));
+    for (const r of affected) await gsSaveRound(r);
+  }
+  renderPlayers();
+}
+
+async function addPlayer() {
+  const inp=document.getElementById('npi'), name=inp.value.trim();
+  if (!name||state.players.includes(name)){inp.value='';return;}
+  state.players.push(name); inp.value='';
+  await saveMeta(); renderPlayers();
+}
+async function deletePlayer(name) {
+  state.players=state.players.filter(p=>p!==name);
+  await saveMeta(); renderPlayers();
+}
+
+// ── Custom number pad ─────────────────────────────────────────
+let _npRid='', _npPlayer='', _npHole=0, _npVal='';
+
+function openNumpad(rid, player, hole) {
+  _npRid=rid; _npPlayer=player; _npHole=hole;
+  const round=state.rounds.find(r=>r.id===rid);
+  const cur=round&&round.scores[player]?.[hole];
+  _npVal=(cur!==undefined&&cur!=='') ? String(cur) : '';
+  document.getElementById('np-hole').textContent=hole;
+  document.getElementById('np-player').textContent=player;
+  document.getElementById('numpad-display').textContent=_npVal||'—';
+  document.getElementById('numpad-overlay').classList.add('open');
+}
+
+function npOverlayClick(e) {
+  if(e.target===document.getElementById('numpad-overlay')) npDone();
+}
+
+function npTap(key) {
+  if(key==='clear') {
+    _npVal=_npVal.slice(0,-1);
+  } else {
+    if(_npVal.length>=2) return; // max 2 digits
+    _npVal+=key;
+    if(_npVal==='00') _npVal='0';
+  }
+  document.getElementById('numpad-display').textContent=_npVal||'—';
+}
+
+function npDone() {
+  document.getElementById('numpad-overlay').classList.remove('open');
+  if(!_npRid) return;
+  const val=_npVal==='' ? '' : Number(_npVal);
+  // Update display cell
+  const cellId='sc-'+safeId(_npRid,_npPlayer)+'-'+_npHole;
+  const cell=document.getElementById(cellId);
+  if(cell) {
+    cell.textContent=(val===''||val===undefined) ? '—' : val;
+    cell.className='sc-score-cell '+(val!=='' ? 'has-score':'no-score');
+  }
+  // Save score
+  liveScore(_npRid,_npPlayer,_npHole,_npVal);
+  _npRid=''; _npPlayer=''; _npHole=0; _npVal='';
+}
+
+init();
+
+
+</script>
+</body>
+</html>
