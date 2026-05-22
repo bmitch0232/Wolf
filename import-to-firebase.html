@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Import to Firebase — CV Golf</title>
+  <style>
+    body { font-family: Georgia, serif; max-width: 600px; margin: 2rem auto; padding: 1rem; background: #f5f3ee; color: #1a1916; }
+    h1 { font-size: 20px; margin-bottom: .5rem; }
+    p { font-size: 14px; color: #6b6760; margin-bottom: 1rem; line-height: 1.6; }
+    .card { background: #fff; border: 1px solid #d8d4ca; border-radius: 12px; padding: 1.25rem; margin-bottom: 1rem; }
+    label { font-size: 13px; color: #6b6760; display: block; margin-bottom: 4px; }
+    input, textarea { width: 100%; padding: 9px 11px; border: 1px solid #d8d4ca; border-radius: 8px; font-size: 14px; font-family: Georgia, serif; box-sizing: border-box; }
+    textarea { height: 120px; resize: vertical; }
+    .btn { padding: 10px 20px; border: none; border-radius: 8px; background: #1a5276; color: #fff; font-size: 14px; font-family: Georgia, serif; cursor: pointer; width: 100%; margin-top: .5rem; }
+    .btn:hover { opacity: .85; }
+    .btn:disabled { opacity: .5; cursor: not-allowed; }
+    .log { background: #1a1916; color: #6ee7b7; font-family: monospace; font-size: 12px; padding: 1rem; border-radius: 8px; height: 200px; overflow-y: auto; white-space: pre-wrap; margin-top: 1rem; }
+    .success { color: #6ee7b7; }
+    .error   { color: #fca5a5; }
+    .info    { color: #93c5fd; }
+  </style>
+</head>
+<body>
+<h1>📥 Import Google Sheets Data → Firebase</h1>
+<p>This tool reads your existing data from Google Sheets and imports it into Firebase. Run it once — it won't duplicate data on repeated runs.</p>
+
+<div class="card">
+  <label>Google Sheets Web App URL</label>
+  <input id="sheets-url" type="text" placeholder="https://script.google.com/macros/s/.../exec"
+    value="https://script.google.com/macros/s/AKfycbzYfEFwVqbqToK-ZKB9gLcdZlvpnjtObuIqQKdtP3UWpw1K4IuS8Jtm50WL4h3quxKo/exec" />
+</div>
+
+<div class="card">
+  <p style="margin-bottom:0">Click <strong>Start Import</strong> to load all your rounds, scores, and players from Google Sheets and save them to Firebase.</p>
+  <button class="btn" id="import-btn" onclick="startImport()">Start Import</button>
+</div>
+
+<div class="log" id="log">Ready. Press Start Import to begin.\n</div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { getFirestore, doc, setDoc, getDocs, collection } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey:            "AIzaSyA3rRZ0Bg8GGYbiNU8jQpzd_FqUMRymvGQ",
+  authDomain:        "central-valley-golf.firebaseapp.com",
+  projectId:         "central-valley-golf",
+  storageBucket:     "central-valley-golf.firebasestorage.app",
+  messagingSenderId: "190428641752",
+  appId:             "1:190428641752:web:1925fd5bc4bf8abc661aad"
+};
+
+const app = initializeApp(firebaseConfig);
+const db  = getFirestore(app);
+
+function log(msg, cls='') {
+  const el = document.getElementById('log');
+  const line = document.createElement('span');
+  if(cls) line.className = cls;
+  line.textContent = msg + '\n';
+  el.appendChild(line);
+  el.scrollTop = el.scrollHeight;
+}
+
+// Load from Google Sheets via JSONP
+function loadFromSheets(url) {
+  return new Promise((resolve, reject) => {
+    const cb = 'import_cb_' + Date.now();
+    const script = document.createElement('script');
+    const timer = setTimeout(() => {
+      delete window[cb];
+      script.remove();
+      reject(new Error('Timeout — check your Sheets URL'));
+    }, 15000);
+    window[cb] = data => {
+      clearTimeout(timer);
+      delete window[cb];
+      script.remove();
+      resolve(data);
+    };
+    script.src = url + '?action=loadAll&callback=' + cb;
+    script.onerror = () => { clearTimeout(timer); reject(new Error('Script load failed')); };
+    document.head.appendChild(script);
+  });
+}
+
+window.startImport = async function() {
+  const btn = document.getElementById('import-btn');
+  const url = document.getElementById('sheets-url').value.trim();
+  if(!url) { log('❌ Please enter your Sheets URL', 'error'); return; }
+
+  btn.disabled = true;
+  log('📡 Loading data from Google Sheets…', 'info');
+
+  let sheetsData;
+  try {
+    sheetsData = await loadFromSheets(url);
+    if(!sheetsData || sheetsData.error) throw new Error(sheetsData?.error || 'No data returned');
+  } catch(e) {
+    log('❌ Failed to load from Sheets: ' + e.message, 'error');
+    btn.disabled = false;
+    return;
+  }
+
+  const rounds  = sheetsData.rounds  || [];
+  const players = sheetsData.players || [];
+  const rate    = sheetsData.pointRate ?? 0.25;
+
+  log(`✅ Loaded ${rounds.length} rounds and ${players.length} players from Sheets`, 'success');
+
+  // Check what's already in Firebase
+  log('🔍 Checking existing Firebase data…', 'info');
+  const existing = new Set();
+  try {
+    const snap = await getDocs(collection(db, 'rounds'));
+    snap.forEach(d => existing.add(d.id));
+    log(`   Found ${existing.size} rounds already in Firebase`, 'info');
+  } catch(e) {
+    log('❌ Firebase connection error: ' + e.message, 'error');
+    btn.disabled = false;
+    return;
+  }
+
+  // Import rounds
+  let imported = 0, skipped = 0, failed = 0;
+  for(const round of rounds) {
+    if(!round.id) { skipped++; continue; }
+    if(existing.has(round.id)) {
+      log(`   ⏭ Skipped (already exists): ${round.date}`, '');
+      skipped++;
+      continue;
+    }
+    try {
+      await setDoc(doc(db, 'rounds', round.id), round);
+      log(`   ✅ Imported: ${round.date} — ${(round.players||[]).join(', ')}`, 'success');
+      imported++;
+    } catch(e) {
+      log(`   ❌ Failed: ${round.date} — ${e.message}`, 'error');
+      failed++;
+    }
+  }
+
+  // Import players and settings
+  try {
+    await setDoc(doc(db, 'meta', 'players'),  { list: players });
+    await setDoc(doc(db, 'meta', 'settings'), { pointRate: rate });
+    log('✅ Players and settings imported', 'success');
+  } catch(e) {
+    log('❌ Failed to import meta: ' + e.message, 'error');
+  }
+
+  log('', '');
+  log('════════════════════════════════', 'info');
+  log(`Import complete!`, 'success');
+  log(`  ✅ Imported: ${imported} rounds`, 'success');
+  log(`  ⏭ Skipped:  ${skipped} rounds (already in Firebase)`, '');
+  if(failed) log(`  ❌ Failed:   ${failed} rounds`, 'error');
+  log('', '');
+  log('You can now use Central Valley Golf Tracker with Firebase!', 'success');
+  btn.textContent = 'Import Complete ✓';
+};
+</script>
+</body>
+</html>
